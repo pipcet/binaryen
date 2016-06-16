@@ -48,6 +48,28 @@ int unhex(char c) {
   abort();
 }
 
+int atoi_t(const char *str)
+{
+  char *endptr;
+  int ret = strtol(str, &endptr, 10);
+
+  if (endptr && endptr[0])
+    throw ParseException("expected integer");
+
+  return ret;
+}
+
+int atoll_t(const char *str)
+{
+  char *endptr;
+  long long ret = strtoll(str, &endptr, 10);
+
+  if (endptr && endptr[0])
+    throw ParseException("expected integer");
+
+  return ret;
+}
+
 //
 // An element in an S-Expression: a list or a string
 //
@@ -361,7 +383,7 @@ private:
       return s.str();
     } else {
       // index
-      size_t offset = atoi(s.str().c_str());
+      size_t offset = atoi_t(s.str().c_str());
       if (offset >= functionNames.size()) throw ParseException("unknown function");
       return functionNames[offset];
     }
@@ -840,7 +862,7 @@ private:
       return currFunction->getLocalIndex(ret);
     }
     // this is a numeric index
-    Index ret = atoi(s.c_str());
+    Index ret = atoi_t(s.c_str());
     if (ret >= currFunction->getNumLocals()) throw ParseException("bad local index", s.line, s.col);
     return ret;
   }
@@ -959,7 +981,7 @@ private:
       assert(eq);
       eq++;
       if (str[0] == 'a') {
-        ret->align = atoi(eq);
+        ret->align = atoi_t(eq);
       } else if (str[0] == 'o') {
         uint64_t offset = atoll(eq);
         if (offset > std::numeric_limits<uint32_t>::max()) throw ParseException("bad offset");
@@ -997,9 +1019,9 @@ private:
       assert(eq);
       eq++;
       if (str[0] == 'a') {
-        ret->align = atoi(eq);
+        ret->align = atoi_t(eq);
       } else if (str[0] == 'o') {
-        ret->offset = atoi(eq);
+        ret->offset = atoi_t(eq);
       } else throw ParseException("bad store attribute");
       i++;
     }
@@ -1229,11 +1251,10 @@ private:
   void parseMemory(Element& s) {
     hasMemory = true;
 
-    wasm.memory.initial = atoi(s[1]->c_str());
+    wasm.memory.initial = atoi_t(s[1]->c_str());
     if (s.size() == 2) return;
     size_t i = 2;
-    if (s[i]->isStr()) {
-      uint64_t max = atoll(s[i]->c_str());
+    if (s[i]->isStr()) {      uint64_t max = atoll(s[i]->c_str());
       if (max > Memory::kMaxSize) throw ParseException("total memory must be <= 4GB");
       wasm.memory.max = max;
       i++;
@@ -1245,9 +1266,9 @@ private:
       if (auto size = strlen(input)) {
         std::vector<char> data;
         stringToBinary(input, size, data);
-        wasm.memory.segments.emplace_back(atoi(curr[1]->c_str()), data.data(), data.size());
+        wasm.memory.segments.emplace_back(atoi_t(curr[1]->c_str()), data.data(), data.size());
       } else {
-        wasm.memory.segments.emplace_back(atoi(curr[1]->c_str()), "", 0);
+        wasm.memory.segments.emplace_back(atoi_t(curr[1]->c_str()), "", 0);
       }
       i++;
     }
