@@ -384,7 +384,7 @@ private:
     } else {
       // index
       size_t offset = atoi_t(s.str().c_str());
-      if (offset >= functionNames.size()) throw ParseException("unknown function");
+      if (offset < 0 || offset >= functionNames.size()) throw ParseException("unknown function");
       return functionNames[offset];
     }
   }
@@ -863,7 +863,7 @@ private:
     }
     // this is a numeric index
     Index ret = atoi_t(s.c_str());
-    if (ret >= currFunction->getNumLocals()) throw ParseException("bad local index", s.line, s.col);
+    if (ret < 0 || ret >= currFunction->getNumLocals()) throw ParseException("bad local index", s.line, s.col);
     return ret;
   }
 
