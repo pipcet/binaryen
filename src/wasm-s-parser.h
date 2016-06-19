@@ -517,7 +517,7 @@ private:
       makeFunction();
       body = allocator.alloc<Nop>();
     }
-    assert(currFunction->result == result);
+    if (currFunction->result != result) throw ParseException("bad func declaration", s.line, s.col);
     currFunction->body = body;
     currFunction->type = type;
     wasm.addFunction(currFunction.release());
