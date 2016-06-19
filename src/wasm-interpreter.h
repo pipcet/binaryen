@@ -509,7 +509,7 @@ public:
   // an imported function or accessing memory.
   //
   struct ExternalInterface {
-    virtual void init(Module& wasm) {}
+    virtual void init(Module& wasm, ModuleInstance* instance) {}
     virtual Literal callImport(Import* import, LiteralList& arguments) = 0;
     virtual Literal load(Load* load, Address addr) = 0;
     virtual void store(Store* store, Address addr, Literal value) = 0;
@@ -521,7 +521,7 @@ public:
 
   ModuleInstance(Module& wasm, ExternalInterface* externalInterface) : wasm(wasm), externalInterface(externalInterface) {
     memorySize = wasm.memory.initial;
-    externalInterface->init(wasm);
+    externalInterface->init(wasm, this);
     if (wasm.start.is()) {
       LiteralList arguments;
       callFunction(wasm.start, arguments);

@@ -31,6 +31,7 @@ struct ExitException {};
 struct TrapException {};
 
 struct ShellExternalInterface : ModuleInstance::ExternalInterface {
+  ModuleInstance *wasmInstance_;
   // The underlying memory can be accessed through unaligned pointers which
   // isn't well-behaved in C++. WebAssembly nonetheless expects it to behave
   // properly. Avoid emitting unaligned load/store by checking for alignment
@@ -87,7 +88,9 @@ struct ShellExternalInterface : ModuleInstance::ExternalInterface {
 
   ShellExternalInterface() : memory() {}
 
-  void init(Module& wasm) override {
+  void init(Module& wasm, ModuleInstance* wasmInstance) override
+  {
+    wasmInstance_ = wasmInstance;
     memory.resize(wasm.memory.initial * wasm::Memory::kPageSize);
     // apply memory segments
     for (auto& segment : wasm.memory.segments) {
@@ -108,6 +111,43 @@ struct ShellExternalInterface : ModuleInstance::ExternalInterface {
       // XXX hack for torture tests
       std::cout << "exit()\n";
       throw ExitException();
+    }
+    if (strcmp(import->name.str, "cp") == 0){
+      for (auto argument : arguments) {
+        std::cout << argument << '\n';
+      }
+      return Literal(int64_t(0));
+    } else if (strcmp(import->name.str, "extcall") == 0) {
+      int count = 0;
+      for (auto argument : arguments) {
+        std::cout << argument << '\n';
+        if (count == 0) {
+          int8_t c;
+          int off = 0;
+          while ((c = memory.get<int8_t>(argument.geti64() + off++)))
+            std::cout << c;
+          std::cout << '\n';
+        } else if (count == 1) {
+          int8_t c;
+          int off = 0;
+          while ((c = memory.get<int8_t>(argument.geti64() + off++)))
+            std::cout << c;
+          std::cout << '\n';
+        }
+        count++;
+      }
+      return Literal(int64_t(0));
+    } else if (strcmp(import->name.str, "indcall") == 0) {
+      int count = 0;
+      char buf[1024];
+      for (auto argument : arguments) {
+        std::cout << argument << '\n';
+        if (count++ == 5) {
+          snprintf(buf, 1024, "f_0x%015lx0", argument.geti64());
+        }
+      }
+      printf("calling %s\n", buf);
+      return wasmInstance_->callExport(buf, arguments);
     }
     std::cout << "callImport " << import->name.str << "\n";
     abort();
