@@ -176,6 +176,11 @@ int main(int argc, const char* argv[]) {
              o->extra["output"] = argument;
              Colors::disable();
            })
+      .add("--data", "-d", "Data section file",
+           Options::Arguments::One,
+           [](Options *o, const std::string &argument) {
+             o->extra["data"] = argument;
+           })
       .add(
           "--entry", "-e", "call the entry point after parsing the module",
           Options::Arguments::One,
@@ -221,6 +226,12 @@ int main(int argc, const char* argv[]) {
         Module wasm;
         std::unique_ptr<SExpressionWasmBuilder> builder;
         builder = make_unique<SExpressionWasmBuilder>(wasm, *root[i]);
+        if (options.extra["data"] != "") {
+          auto input(read_file<std::string>(options.extra["data"], Flags::Binary,
+                                            options.debug ? Flags::Debug : Flags::Release));
+          wasm.memory.segments.push_back(Memory::Segment(0x4040, input.c_str(), input.length()));
+        }
+
         i++;
         assert(WasmValidator().validate(wasm));
 

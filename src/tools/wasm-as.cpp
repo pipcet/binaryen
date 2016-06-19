@@ -37,6 +37,11 @@ int main(int argc, const char *argv[]) {
              o->extra["output"] = argument;
              Colors::disable();
            })
+      .add("--data", "-d", "Data section file",
+           Options::Arguments::One,
+           [](Options *o, const std::string &argument) {
+             o->extra["data"] = argument;
+           })
       .add("--validate", "-v", "Control validation of the output module",
            Options::Arguments::One,
            [](Options *o, const std::string &argument) {
@@ -60,11 +65,18 @@ int main(int argc, const char *argv[]) {
     if (options.debug) std::cerr << "s-parsing..." << std::endl;
     SExpressionParser parser(const_cast<char*>(input.c_str()));
     Element& root = *parser.root;
+
     if (options.debug) std::cerr << "w-parsing..." << std::endl;
     SExpressionWasmBuilder builder(wasm, *root[0]);
   } catch (ParseException& p) {
     p.dump(std::cerr);
     Fatal() << "error in parsing input";
+  }
+
+  if (options.extra["data"] != "") {
+    auto input(read_file<std::string>(options.extra["data"], Flags::Binary,
+                                      options.debug ? Flags::Debug : Flags::Release));
+    wasm.memory.segments.push_back(Memory::Segment(0x4040, input.c_str(), input.length()));
   }
 
   if (options.extra["validate"] != "none") {
