@@ -119,6 +119,12 @@ struct ShellExternalInterface : ModuleInstance::ExternalInterface {
       return Literal(int64_t(0));
     } else if (strcmp(import->name.str, "extcall") == 0) {
       int count = 0;
+      char buf[1024];
+      char *p = buf;
+      Address sp;
+
+      std::cout << wasmInstance_->printFunctionStack();
+
       for (auto argument : arguments) {
         std::cout << argument << '\n';
         if (count == 0) {
@@ -130,16 +136,41 @@ struct ShellExternalInterface : ModuleInstance::ExternalInterface {
         } else if (count == 1) {
           int8_t c;
           int off = 0;
-          while ((c = memory.get<int8_t>(argument.geti64() + off++)))
+          while ((c = memory.get<int8_t>(argument.geti64() + off++))) {
+            *p++ = c;
             std::cout << c;
+          }
+          *p++ = 0;
           std::cout << '\n';
+        } else if (count == 3) {
+          sp = argument.geti64();
         }
         count++;
       }
+
+      if (strcmp(buf, "write") == 0) {
+        Address ptr = memory.get<int64_t>(sp + 0x28);
+        int64_t off = 0;
+        int64_t count = memory.get<int64_t>(sp + 0x30);
+
+        std::cout << count << " bytes at " << ptr << "/" << sp << '\n';
+
+        while (off < count)
+          std::cout << memory.get<int8_t>(ptr + off++);
+
+        memory.set<int64_t>(4096, count);
+      } else {
+        memory.set<int64_t>(4096, -1LL);
+      }
+
       return Literal(int64_t(0));
     } else if (strcmp(import->name.str, "indcall") == 0) {
       int count = 0;
+      Literal ret(int64_t(0));
       char buf[1024];
+
+      std::cout << wasmInstance_->printFunctionStack();
+
       for (auto argument : arguments) {
         std::cout << argument << '\n';
         if (count++ == 5) {
@@ -147,7 +178,9 @@ struct ShellExternalInterface : ModuleInstance::ExternalInterface {
         }
       }
       printf("calling %s\n", buf);
-      return wasmInstance_->callExport(buf, arguments);
+      ret = wasmInstance_->callExportNoClear(buf, arguments);
+      printf("return %s from %lx\n", buf, ret.geti64());
+      return ret;
     }
     std::cout << "callImport " << import->name.str << "\n";
     abort();

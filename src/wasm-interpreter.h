@@ -96,10 +96,10 @@ struct IndentHandler {
     std::cout << "exit " << name << '\n';
   }
 };
-#define NOTE_ENTER(x) IndentHandler indentHandler(instance.indent, x, curr);
-#define NOTE_NAME(p0) { doIndent(std::cout, instance.indent); std::cout << "name in " << indentHandler.name << '('  << Name(p0) << ")\n"; }
-#define NOTE_EVAL1(p0) { doIndent(std::cout, instance.indent); std::cout << "eval in " << indentHandler.name << '('  << p0 << ")\n"; }
-#define NOTE_EVAL2(p0, p1) { doIndent(std::cout, instance.indent); std::cout << "eval in " << indentHandler.name << '('  << p0 << ", " << p1 << ")\n"; }
+#define NOTE_ENTER(x) int indent = 0; IndentHandler indentHandler(indent, x, curr);
+#define NOTE_NAME(p0) { std::cout << "name in " << indentHandler.name << '('  << Name(p0) << ")\n"; }
+#define NOTE_EVAL1(p0) { std::cout << "eval in " << indentHandler.name << '('  << p0 << ")\n"; }
+#define NOTE_EVAL2(p0, p1) { std::cout << "eval in " << indentHandler.name << '('  << p0 << ", " << p1 << ")\n"; }
 #else // WASM_INTERPRETER_DEBUG
 #define NOTE_ENTER(x)
 #define NOTE_NAME(p0)
@@ -534,6 +534,12 @@ public:
     return callFunction(export_->value, arguments);
   }
 
+  Literal callExportNoClear(Name name, LiteralList& arguments) {
+    Export *export_ = wasm.checkExport(name);
+    if (!export_) externalInterface->trap("callExport not found");
+    return callFunctionNoClear(export_->value, arguments);
+  }
+
   std::string printFunctionStack() {
     std::string ret = "/== (binaryen interpreter stack trace)\n";
     for (int i = int(functionStack.size()) - 1; i >= 0; i--) {
@@ -560,6 +566,11 @@ private:
     // if the last call ended in a jump up the stack, it might have left stuff for us to clean up here
     callDepth = 0;
     functionStack.clear();
+    return callFunctionInternal(name, arguments);
+  }
+
+  Literal callFunctionNoClear(IString name, LiteralList& arguments) {
+    // if the last call ended in a jump up the stack, it might have left stuff for us to clean up here
     return callFunctionInternal(name, arguments);
   }
 
