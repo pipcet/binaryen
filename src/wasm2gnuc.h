@@ -230,6 +230,8 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
     }
     ret += "(";
     ret += visit(curr->ptr);
+    ret += "+";
+    ret += toString((int64_t)curr->offset)
     ret += ");";
     ret += "})";
     return ret;
@@ -243,6 +245,8 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
     ret += toString(int64_t(curr->bytes * 8));
     ret += "(";
     ret += visit(curr->ptr);
+    ret += "+";
+    ret += toString((int64_t)curr->offset)
     ret += ", ";
     ret += visit(curr->value);
     ret += ");";
