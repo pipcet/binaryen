@@ -231,7 +231,7 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
     ret += "(";
     ret += visit(curr->ptr);
     ret += "+";
-    ret += toString((int64_t)curr->offset)
+    ret += toString((int64_t)curr->offset);
     ret += ");";
     ret += "})";
     return ret;
@@ -246,7 +246,7 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
     ret += "(";
     ret += visit(curr->ptr);
     ret += "+";
-    ret += toString((int64_t)curr->offset)
+    ret += toString((int64_t)curr->offset);
     ret += ", ";
     ret += visit(curr->value);
     ret += ");";
@@ -483,6 +483,8 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
   {
     std::string ret = "\n\n";
 
+    ret += "static ";
+
     if (curr->result == none)
       ret += "void";
     else
@@ -525,6 +527,8 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
   std::string visitFunction(Function *curr)
   {
     std::string ret = "\n\n";
+
+    ret += "static ";
 
     if (curr->result == none)
       ret += "void";
