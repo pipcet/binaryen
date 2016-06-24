@@ -101,7 +101,6 @@ struct LEB {
       value |= significant_payload << shift;
       if (last) break;
       shift += 7;
-      assert(size_t(shift) < sizeof(T) * 8 && "LEB overflow");
     }
     // If signed LEB, then we might need to sign-extend. (compile should
     // optimize this out if not needed).
@@ -1636,7 +1635,9 @@ public:
       functions[i]->name = getInlineString();
       auto numLocals = getU32LEB();
       WASM_UNUSED(numLocals);
-      assert(numLocals == 0); // TODO
+      //assert(numLocals == 0); // TODO
+      for (size_t j = 0; j < numLocals; j++)
+        getInlineString();
     }
   }
 
@@ -1809,7 +1810,8 @@ public:
     assert(index < functionTypes.size());
     auto type = functionTypes[index];
     auto num = type->params.size();
-    assert(num == arity);
+    //assert(num == arity);
+    num = arity;
     curr->operands.resize(num);
     for (size_t i = 0; i < num; i++) {
       curr->operands[num - i - 1] = popExpression();
@@ -1852,13 +1854,13 @@ public:
   void visitGetLocal(GetLocal *curr) {
     if (debug) std::cerr << "zz node: GetLocal " << pos << std::endl;
     curr->index = getU32LEB();
-    assert(curr->index < currFunction->getNumLocals());
+    //assert(curr->index < currFunction->getNumLocals());
     curr->type = currFunction->getLocalType(curr->index);
   }
   void visitSetLocal(SetLocal *curr) {
     if (debug) std::cerr << "zz node: SetLocal" << std::endl;
     curr->index = getU32LEB();
-    assert(curr->index < currFunction->getNumLocals());
+    //assert(curr->index < currFunction->getNumLocals());
     curr->value = popExpression();
     curr->type = curr->value->type;
   }
