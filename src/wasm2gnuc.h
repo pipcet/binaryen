@@ -150,6 +150,7 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
     std::string ret = "({";
     size_t i = 0;
 
+    ret += "_";
     ret += curr->target.str;
     ret += "(";
 
@@ -188,7 +189,25 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
   }
   std::string visitCallIndirect(CallIndirect *curr)
   {
-    return "";
+    std::string ret = "({";
+    size_t i = 0;
+
+    ret += "table[";
+    ret += visit(curr->target);
+    ret += "]";
+    ret += "(";
+
+    for (auto op : curr->operands) {
+      ret += visit(op);
+      if (++i < curr->operands.size())
+        ret += ", ";
+    }
+
+    ret += ")";
+    ret += ";";
+    ret += "})";
+
+    return ret;
   }
   std::string visitGetLocal(GetLocal *curr)
   {
@@ -489,7 +508,7 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
       ret += "void";
     else
       ret += printWasmType(curr->result);
-    ret += " ";
+    ret += " _";
     ret += std::string(curr->name.str);
     ret += "(";
     Index i = 0;
@@ -514,10 +533,10 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
 
     std::string ret = "";
 
-    ret += "case ";
+    ret += "case _";
     ret += curr->name.str + 2;
     ret += "UL:\n";
-    ret += "return ";
+    ret += "return _";
     ret += curr->name.str;
     ret += "(dpc, sp, r0, r1, rpc, pc0);\n";
 
@@ -534,7 +553,7 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
       ret += "void";
     else
       ret += printWasmType(curr->result);
-    ret += " ";
+    ret += " _";
     ret += std::string(curr->name.str);
     ret += "(";
     Index i = 0;
@@ -571,7 +590,7 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
     for (auto & function : curr->functions)
       ret += visitFunction(&*function);
 
-    ret += "\n\ni64 import$2(i64 dpc, i64 sp, i64 r0, i64 r1, i64 rpc, i64 pc0)\n";
+    ret += "\n\ni64 import_2(i64 dpc, i64 sp, i64 r0, i64 r1, i64 rpc, i64 pc0)\n";
     ret += "{\n";
     ret += "switch(pc0<<4ULL) {\n";
     for (auto & function : curr->functions)
