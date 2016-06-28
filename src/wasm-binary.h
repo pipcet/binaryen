@@ -1633,10 +1633,12 @@ public:
     auto num = getU32LEB();
     assert(num == functions.size());
     for (size_t i = 0; i < num; i++) {
-      functions[i]->name = getInlineString();
+      //functions[i]->name =
+      getInlineString();
       auto numLocals = getU32LEB();
       WASM_UNUSED(numLocals);
-      assert(numLocals == 0); // TODO
+      while (numLocals--)
+        getInlineString();
     }
   }
 
