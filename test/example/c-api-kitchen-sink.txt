@@ -3,6 +3,9 @@ BinaryenInt32: 1
 BinaryenInt64: 2
 BinaryenFloat32: 3
 BinaryenFloat64: 4
+(f32.neg
+  (f32.const -33.61199951171875)
+)
 (module
   (memory 1 256
     (segment 10 "hello, world")
@@ -367,6 +370,7 @@ raw:
 (module
   (memory 0)
   (type $v (func))
+  (type $i (func (result i32)))
   (func $just-one-block (type $v)
     (local $0 i32)
     (i32.const 1337)
@@ -627,13 +631,26 @@ raw:
       )
     )
   )
+  (func $return (type $i) (result i32)
+    (local $0 i32)
+    (block $the-list
+      (i32.const 42)
+      (return
+        (i32.const 1337)
+      )
+    )
+  )
 )
 optimized:
 (module
   (memory 0)
   (type $v (func))
+  (type $i (func (result i32)))
   (func $just-one-block (type $v)
     (nop)
+  )
+  (func $return (type $i) (result i32)
+    (i32.const 1337)
   )
 )
 module loaded from binary form:
@@ -647,3 +664,16 @@ module loaded from binary form:
     )
   )
 )
+(module
+  (memory 0)
+  (start $starter)
+  (type $vi (func (param i32)))
+  (type $v (func))
+  (import $print-i32 "spectest" "print" (param i32))
+  (func $starter (type $v)
+    (call_import $print-i32
+      (i32.const 1234)
+    )
+  )
+)
+(i32.const 1234)

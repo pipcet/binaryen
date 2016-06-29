@@ -569,7 +569,7 @@ void CoalesceLocalsWithLearning::pickIndices(std::vector<Index>& indices) {
 #ifdef CFG_LEARN_DEBUG
   std::cout << "[learning for " << getFunction()->name << "]\n";
 #endif
-  auto numVars = getFunction()->getNumVars();
+  auto numVars = this->getFunction()->getNumVars();
   const int GENERATION_SIZE = std::min(Index(numVars * (numVars - 1)), Index(20));
   Generator generator(this);
   GeneticLearner<Order, double, Generator> learner(generator, GENERATION_SIZE);
@@ -590,13 +590,17 @@ void CoalesceLocalsWithLearning::pickIndices(std::vector<Index>& indices) {
 #ifdef CFG_LEARN_DEBUG
   learner.getBest()->dump("the best");
 #endif
-  pickIndicesFromOrder(*learner.getBest(), indices); // TODO: cache indices in Orders, at the cost of more memory?
+  this->pickIndicesFromOrder(*learner.getBest(), indices); // TODO: cache indices in Orders, at the cost of more memory?
 }
 
 // declare passes
 
-static RegisterPass<CoalesceLocals> registerPass1("coalesce-locals", "reduce # of locals by coalescing");
+Pass *createCoalesceLocalsPass() {
+  return new CoalesceLocals();
+}
 
-static RegisterPass<CoalesceLocalsWithLearning> registerPass2("coalesce-locals-learning", "reduce # of locals by coalescing and learning");
+Pass *createCoalesceLocalsWithLearningPass() {
+  return new CoalesceLocalsWithLearning();
+}
 
 } // namespace wasm

@@ -25,13 +25,6 @@
 using namespace wasm;
 
 cashew::IString EMSCRIPTEN_ASM_CONST("emscripten_asm_const");
-namespace wasm {
-// These are defined (not just declared) in shared-constants.h, so we can't just
-// include that header.  TODO: Move the definitions into a cpp file.
-extern cashew::IString ENV;
-extern cashew::IString MEMORY;
-}
-
 
 void Linker::placeStackPointer(Address stackAllocation) {
   // ensure this is the first allocation
@@ -135,7 +128,7 @@ void Linker::layout() {
 
     if (relocation->kind == LinkerObject::Relocation::kData) {
       const auto& symbolAddress = staticAddresses.find(name);
-      assert(symbolAddress != staticAddresses.end());
+      if (symbolAddress == staticAddresses.end()) Fatal() << "Unknown relocation: " << name << '\n';
       *(relocation->data) = symbolAddress->second + relocation->addend;
       if (debug) std::cerr << "  ==> " << *(relocation->data) << '\n';
     } else {
@@ -403,7 +396,7 @@ Function* Linker::getImportThunk(Name name, const FunctionType* funcType) {
   for (Index i = 0; i < funcType->params.size(); ++i) {
     args.push_back(wasmBuilder.makeGetLocal(i, funcType->params[i]));
   }
-  Expression* call = wasmBuilder.makeCallImport(name, args);
+  Expression* call = wasmBuilder.makeCallImport(name, args, funcType->result);
   f->body = call;
   out.wasm.addFunction(f);
   return f;

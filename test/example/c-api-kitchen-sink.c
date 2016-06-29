@@ -192,6 +192,8 @@ void test_core() {
     BinaryenUnreachable(module),
   };
 
+  BinaryenExpressionPrint(valueList[3]); // test printing a standalone expression
+
   // Make the main body of the function. and one block with a return value, one without
   BinaryenExpressionRef value = BinaryenBlock(module, "the-value", valueList, sizeof(valueList) / sizeof(BinaryenExpressionRef));
   BinaryenExpressionRef nothing = BinaryenBlock(module, "the-nothing", &value, 1);
@@ -376,6 +378,17 @@ void test_relooper() {
     BinaryenFunctionRef sinker = BinaryenAddFunction(module, "nontrivial-loop-plus-phi-to-head", v, localTypes, 1, body);
   }
 
+  BinaryenFunctionTypeRef i = BinaryenAddFunctionType(module, "i", BinaryenInt32(), NULL, 0);
+
+  { // return in a block
+    RelooperRef relooper = RelooperCreate();
+    BinaryenExpressionRef listList[] = { makeInt32(module, 42), BinaryenReturn(module, makeInt32(module, 1337)) };
+    BinaryenExpressionRef list = BinaryenBlock(module, "the-list", listList, 2);
+    RelooperBlockRef block = RelooperAddBlock(relooper, list);
+    BinaryenExpressionRef body = RelooperRenderAndDispose(relooper, block, 0, module);
+    BinaryenFunctionRef sinker = BinaryenAddFunction(module, "return", i, localTypes, 1, body);
+  }
+
   assert(BinaryenModuleValidate(module));
 
   printf("raw:\n");
@@ -420,8 +433,29 @@ void test_binaries() {
   BinaryenModuleDispose(module);
 }
 
+void test_interpret() {
+  // create a simple module with a start method that prints a number, and interpret it, printing that number.
+  BinaryenModuleRef module = BinaryenModuleCreate();
+
+  BinaryenType iparams[2] = { BinaryenInt32() };
+  BinaryenFunctionTypeRef vi = BinaryenAddFunctionType(module, "vi", BinaryenNone(), iparams, 1);
+  BinaryenAddImport(module, "print-i32", "spectest", "print", vi);
+
+  BinaryenFunctionTypeRef v = BinaryenAddFunctionType(module, "v", BinaryenNone(), NULL, 0);
+  BinaryenExpressionRef callOperands[] = { makeInt32(module, 1234) };
+  BinaryenExpressionRef call = BinaryenCallImport(module, "print-i32", callOperands, 1, BinaryenNone());
+  BinaryenFunctionRef starter = BinaryenAddFunction(module, "starter", v, NULL, 0, call);
+  BinaryenSetStart(module, starter);
+
+  BinaryenModulePrint(module);
+  assert(BinaryenModuleValidate(module));
+  BinaryenModuleInterpret(module);
+  BinaryenModuleDispose(module);
+}
+
 int main() {
   test_core();
   test_relooper();
   test_binaries();
+  test_interpret();
 }

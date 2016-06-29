@@ -524,6 +524,18 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
 
     return ret;
   }
+
+  std::string visitFunctionTableEntry(Function *curr)
+  {
+    std::string ret = "";
+
+    ret += "_";
+    ret += std::string(curr->name.str);
+    ret += ",";
+    ret += "\n";
+
+    return ret;
+  }
   
   std::string visitFunctionSwitchStmt(Function *curr)
   {
@@ -590,14 +602,10 @@ struct CVisitor : public Visitor<CVisitor, std::string> {
     for (auto & function : curr->functions)
       ret += visitFunction(&*function);
 
-    ret += "\n\ni64 import_2(i64 dpc, i64 sp, i64 r0, i64 r1, i64 rpc, i64 pc0)\n";
-    ret += "{\n";
-    ret += "switch(pc0<<4ULL) {\n";
+    ret += "i64 (*table[])(i64, i64, i64, i64, i64, i64) = {\n";
     for (auto & function : curr->functions)
-      ret += visitFunctionSwitchStmt(&*function);
-    ret += "default:\nfor(;;);\n";
-    ret += "}\n";
-    ret += "}\n";
+      ret += visitFunctionTableEntry(&*function);
+    ret += "};\n";
 
     return ret;
   }

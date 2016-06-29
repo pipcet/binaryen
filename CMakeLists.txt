@@ -11,6 +11,8 @@ IF(CMAKE_BUILD_TYPE AND
   MESSAGE(FATAL_ERROR "Invalid value for CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 ENDIF()
 
+OPTION(BUILD_STATIC_LIB "Build as a static library" OFF)
+
 # Support functionality.
 
 FUNCTION(ADD_COMPILE_FLAG value)
@@ -38,6 +40,8 @@ FOREACH(SUFFIX "_DEBUG" "_RELEASE" "_RELWITHDEBINFO" "_MINSIZEREL" "")
   SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY${SUFFIX} "${PROJECT_BINARY_DIR}/lib")
 ENDFOREACH()
 
+SET(all_passes passes)
+
 IF(MSVC)
   IF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0") # VS2013 and older explicitly need /arch:sse2 set, VS2015 no longer has that option, but always enabled. 
     ADD_COMPILE_FLAG("/arch:sse2")
@@ -51,7 +55,6 @@ IF(MSVC)
   ENDIF()
   ADD_COMPILE_FLAG("-D_CRT_SECURE_NO_WARNINGS")
   ADD_COMPILE_FLAG("-D_SCL_SECURE_NO_WARNINGS")
-  SET(all_passes passes)
 ELSE()
   SET(THREADS_PREFER_PTHREAD_FLAG ON)
   SET(CMAKE_THREAD_PREFER_PTHREAD ON)
@@ -71,11 +74,6 @@ ELSE()
   ELSE()
     ADD_COMPILE_FLAG("-O2")
     ADD_DEFINITIONS("-UNDEBUG")  # Keep asserts.
-  ENDIF()
-  if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    SET(all_passes "-force_load" passes)
-  ELSE()
-    SET(all_passes "-Wl,--whole-archive" passes "-Wl,-no-whole-archive")
   ENDIF()
 ENDIF()
 
@@ -100,7 +98,11 @@ SET(binaryen_SOURCES
   src/cfg/Relooper.cpp
   src/wasm.cpp
 )
-ADD_LIBRARY(binaryen SHARED ${binaryen_SOURCES})
+IF(BUILD_STATIC_LIB)
+  ADD_LIBRARY(binaryen STATIC ${binaryen_SOURCES})    
+ELSE()
+  ADD_LIBRARY(binaryen SHARED ${binaryen_SOURCES})
+ENDIF()
 TARGET_LINK_LIBRARIES(binaryen asmjs ${all_passes} support)
 
 SET(binaryen-shell_SOURCES
@@ -154,7 +156,7 @@ SET(wasm_dis_SOURCES
 )
 ADD_EXECUTABLE(wasm-dis
                ${wasm_dis_SOURCES})
-TARGET_LINK_LIBRARIES(wasm-dis passes support)
+TARGET_LINK_LIBRARIES(wasm-dis passes support asmjs)
 SET_PROPERTY(TARGET wasm-dis PROPERTY CXX_STANDARD 11)
 SET_PROPERTY(TARGET wasm-dis PROPERTY CXX_STANDARD_REQUIRED ON)
 INSTALL(TARGETS wasm-dis DESTINATION bin)
