@@ -1327,7 +1327,7 @@ Name WasmBinaryBuilder::getGlobalName(Index index) {
       mappedGlobals[index] = wasm.globals[i]->name;
     }
   }
-  assert(mappedGlobals.count(index));
+  //assert(mappedGlobals.count(index));
   return mappedGlobals[index];
 }
 
