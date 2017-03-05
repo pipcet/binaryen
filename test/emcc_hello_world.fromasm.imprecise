@@ -9,10 +9,6 @@
   (import "env" "STACKTOP" (global $STACKTOP$asm2wasm$import i32))
   (import "env" "STACK_MAX" (global $STACK_MAX$asm2wasm$import i32))
   (import "env" "tempDoublePtr" (global $tempDoublePtr$asm2wasm$import i32))
-  (import "env" "ABORT" (global $ABORT$asm2wasm$import i32))
-  (import "env" "cttz_i8" (global $cttz_i8$asm2wasm$import i32))
-  (import "global" "NaN" (global $nan$asm2wasm$import f64))
-  (import "global" "Infinity" (global $inf$asm2wasm$import f64))
   (import "env" "abort" (func $abort))
   (import "env" "nullFunc_ii" (func $nullFunc_ii (param i32)))
   (import "env" "nullFunc_iiii" (func $nullFunc_iiii (param i32)))
@@ -35,38 +31,13 @@
   (import "env" "table" (table 18 18 anyfunc))
   (import "env" "memoryBase" (global $memoryBase i32))
   (import "env" "tableBase" (global $tableBase i32))
-  (elem (i32.const 0) $b0 $___stdio_close $b1 $b1 $___stdout_write $___stdio_seek $___stdio_write $b1 $b1 $b1 $b2 $b2 $b2 $b2 $b2 $_cleanup $b2 $b2)
   (global $STACKTOP (mut i32) (get_global $STACKTOP$asm2wasm$import))
   (global $STACK_MAX (mut i32) (get_global $STACK_MAX$asm2wasm$import))
   (global $tempDoublePtr (mut i32) (get_global $tempDoublePtr$asm2wasm$import))
-  (global $ABORT (mut i32) (get_global $ABORT$asm2wasm$import))
-  (global $cttz_i8 (mut i32) (get_global $cttz_i8$asm2wasm$import))
   (global $__THREW__ (mut i32) (i32.const 0))
   (global $threwValue (mut i32) (i32.const 0))
-  (global $setjmpId (mut i32) (i32.const 0))
-  (global $undef (mut i32) (i32.const 0))
-  (global $nan (mut f64) (get_global $nan$asm2wasm$import))
-  (global $inf (mut f64) (get_global $inf$asm2wasm$import))
-  (global $tempInt (mut i32) (i32.const 0))
-  (global $tempBigInt (mut i32) (i32.const 0))
-  (global $tempBigIntP (mut i32) (i32.const 0))
-  (global $tempBigIntS (mut i32) (i32.const 0))
-  (global $tempBigIntR (mut f64) (f64.const 0))
-  (global $tempBigIntI (mut i32) (i32.const 0))
-  (global $tempBigIntD (mut i32) (i32.const 0))
-  (global $tempValue (mut i32) (i32.const 0))
-  (global $tempDouble (mut f64) (f64.const 0))
   (global $tempRet0 (mut i32) (i32.const 0))
-  (global $tempRet1 (mut i32) (i32.const 0))
-  (global $tempRet2 (mut i32) (i32.const 0))
-  (global $tempRet3 (mut i32) (i32.const 0))
-  (global $tempRet4 (mut i32) (i32.const 0))
-  (global $tempRet5 (mut i32) (i32.const 0))
-  (global $tempRet6 (mut i32) (i32.const 0))
-  (global $tempRet7 (mut i32) (i32.const 0))
-  (global $tempRet8 (mut i32) (i32.const 0))
-  (global $tempRet9 (mut i32) (i32.const 0))
-  (global $tempFloat (mut f64) (f64.const 0))
+  (elem (get_global $tableBase) $b0 $___stdio_close $b1 $b1 $___stdout_write $___stdio_seek $___stdio_write $b1 $b1 $b1 $b2 $b2 $b2 $b2 $b2 $_cleanup $b2 $b2)
   (export "_i64Subtract" (func $_i64Subtract))
   (export "_free" (func $_free))
   (export "_main" (func $_main))
@@ -200,28 +171,25 @@
         (block $switch-case0
           (block $switch-case
             (br_table $switch-case $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-case0 $switch-default
-              (i32.sub
-                (tee_local $3
-                  (i32.and
-                    (tee_local $3
-                      (call $_bitshift64Lshr
-                        (tee_local $2
-                          (i32.load
-                            (get_global $tempDoublePtr)
-                          )
+              (tee_local $3
+                (i32.and
+                  (tee_local $3
+                    (call $_bitshift64Lshr
+                      (tee_local $2
+                        (i32.load
+                          (get_global $tempDoublePtr)
                         )
-                        (tee_local $4
-                          (i32.load offset=4
-                            (get_global $tempDoublePtr)
-                          )
-                        )
-                        (i32.const 52)
                       )
+                      (tee_local $4
+                        (i32.load offset=4
+                          (get_global $tempDoublePtr)
+                        )
+                      )
+                      (i32.const 52)
                     )
-                    (i32.const 2047)
                   )
+                  (i32.const 2047)
                 )
-                (i32.const 0)
               )
             )
           )
@@ -299,11 +267,11 @@
     (set_local $1
       (i32.const 0)
     )
-    (block $jumpthreading$outer$1
-      (block $jumpthreading$inner$1
-        (block $jumpthreading$inner$0
+    (block $__rjto$1
+      (block $__rjti$1
+        (block $__rjti$0
           (loop $while-in
-            (br_if $jumpthreading$inner$0
+            (br_if $__rjti$0
               (i32.eq
                 (i32.load8_u offset=687
                   (get_local $1)
@@ -328,7 +296,7 @@
             (set_local $0
               (i32.const 775)
             )
-            (br $jumpthreading$inner$1)
+            (br $__rjti$1)
           )
         )
         (if
@@ -337,13 +305,13 @@
             (set_local $0
               (i32.const 775)
             )
-            (br $jumpthreading$inner$1)
+            (br $__rjti$1)
           )
           (set_local $0
             (i32.const 775)
           )
         )
-        (br $jumpthreading$outer$1)
+        (br $__rjto$1)
       )
       (loop $while-in1
         (loop $while-in3
@@ -864,9 +832,9 @@
         (get_local $2)
       )
     )
-    (block $jumpthreading$outer$1
-      (block $jumpthreading$inner$1
-        (block $jumpthreading$inner$0
+    (block $__rjto$1
+      (block $__rjti$1
+        (block $__rjti$0
           (loop $while-in
             (if
               (i32.load
@@ -928,13 +896,13 @@
                 )
               )
             )
-            (br_if $jumpthreading$inner$0
+            (br_if $__rjti$0
               (i32.eq
                 (get_local $12)
                 (get_local $3)
               )
             )
-            (br_if $jumpthreading$inner$1
+            (br_if $__rjti$1
               (i32.lt_s
                 (get_local $3)
                 (i32.const 0)
@@ -1063,7 +1031,7 @@
           (get_local $11)
           (get_local $1)
         )
-        (br $jumpthreading$outer$1)
+        (br $__rjto$1)
       )
       (i32.store offset=16
         (get_local $0)
@@ -1405,8 +1373,8 @@
     (local $5 i32)
     (local $6 i32)
     (block $label$break$L5
-      (block $jumpthreading$inner$0
-        (br_if $jumpthreading$inner$0
+      (block $__rjti$0
+        (br_if $__rjti$0
           (tee_local $3
             (i32.load
               (tee_local $4
@@ -1431,7 +1399,7 @@
                 (get_local $4)
               )
             )
-            (br $jumpthreading$inner$0)
+            (br $__rjti$0)
           )
         )
         (br $label$break$L5)
@@ -1859,8 +1827,8 @@
       )
     )
     (block $label$break$L8
-      (block $jumpthreading$inner$2
-        (block $jumpthreading$inner$1
+      (block $__rjti$2
+        (block $__rjti$1
           (if
             (i32.and
               (tee_local $4
@@ -1893,22 +1861,19 @@
               (loop $while-in
                 (if
                   (i32.eq
-                    (i32.load8_s
+                    (i32.load8_u
                       (get_local $2)
                     )
-                    (i32.shr_s
-                      (i32.shl
-                        (get_local $4)
-                        (i32.const 24)
-                      )
-                      (i32.const 24)
+                    (i32.and
+                      (get_local $4)
+                      (i32.const 255)
                     )
                   )
                   (block
                     (set_local $0
                       (get_local $3)
                     )
-                    (br $jumpthreading$inner$2)
+                    (br $__rjti$2)
                   )
                 )
                 (br_if $while-in
@@ -1938,7 +1903,7 @@
                     )
                   )
                 )
-                (br $jumpthreading$inner$1)
+                (br $__rjti$1)
               )
             )
             (block
@@ -1960,7 +1925,7 @@
             (set_local $0
               (get_local $3)
             )
-            (br $jumpthreading$inner$2)
+            (br $__rjti$2)
           )
           (set_local $0
             (i32.const 0)
@@ -1970,20 +1935,14 @@
       )
       (if
         (i32.ne
-          (i32.load8_s
+          (i32.load8_u
             (get_local $2)
           )
-          (i32.shr_s
-            (i32.shl
-              (tee_local $1
-                (i32.and
-                  (get_local $1)
-                  (i32.const 255)
-                )
-              )
-              (i32.const 24)
+          (tee_local $1
+            (i32.and
+              (get_local $1)
+              (i32.const 255)
             )
-            (i32.const 24)
           )
         )
         (block
@@ -1993,9 +1952,9 @@
               (i32.const 16843009)
             )
           )
-          (block $jumpthreading$outer$0
-            (block $jumpthreading$inner$0
-              (br_if $jumpthreading$inner$0
+          (block $__rjto$0
+            (block $__rjti$0
+              (br_if $__rjti$0
                 (i32.le_u
                   (get_local $0)
                   (i32.const 3)
@@ -2043,11 +2002,11 @@
                         (i32.const 3)
                       )
                     )
-                    (br $jumpthreading$inner$0)
+                    (br $__rjti$0)
                   )
                 )
               )
-              (br $jumpthreading$outer$0)
+              (br $__rjto$0)
             )
             (if
               (i32.eqz
@@ -2064,15 +2023,12 @@
           (loop $while-in5
             (br_if $label$break$L8
               (i32.eq
-                (i32.load8_s
+                (i32.load8_u
                   (get_local $2)
                 )
-                (i32.shr_s
-                  (i32.shl
-                    (get_local $1)
-                    (i32.const 24)
-                  )
-                  (i32.const 24)
+                (i32.and
+                  (get_local $1)
+                  (i32.const 255)
                 )
               )
             )
@@ -2130,9 +2086,9 @@
     (local $5 i32)
     (local $6 i32)
     (tee_local $0
-      (block $jumpthreading$outer$0 i32
-        (block $jumpthreading$inner$0
-          (br_if $jumpthreading$inner$0
+      (block $__rjto$0 i32
+        (block $__rjti$0
+          (br_if $__rjti$0
             (i32.le_u
               (i32.load
                 (tee_local $1
@@ -2168,12 +2124,12 @@
               )
             )
           )
-          (br_if $jumpthreading$inner$0
+          (br_if $__rjti$0
             (i32.load
               (get_local $1)
             )
           )
-          (br $jumpthreading$outer$0
+          (br $__rjto$0
             (i32.const -1)
           )
         )
@@ -2452,7 +2408,7 @@
       (i32.const 0)
     )
     (block $label$break$L343
-      (block $jumpthreading$inner$9
+      (block $__rjti$9
         (loop $label$continue$L1
           (block $label$break$L1
             (if
@@ -2483,18 +2439,12 @@
                 )
               )
             )
-            (br_if $jumpthreading$inner$9
+            (br_if $__rjti$9
               (i32.eqz
-                (i32.shr_s
-                  (i32.shl
-                    (tee_local $7
-                      (i32.load8_s
-                        (get_local $5)
-                      )
-                    )
-                    (i32.const 24)
+                (tee_local $7
+                  (i32.load8_s
+                    (get_local $5)
                   )
-                  (i32.const 24)
                 )
               )
             )
@@ -2502,29 +2452,26 @@
               (get_local $5)
             )
             (block $label$break$L12
-              (block $jumpthreading$inner$1
+              (block $__rjti$1
                 (loop $label$continue$L9
                   (block $label$break$L9
                     (block $switch-default
                       (block $switch-case0
                         (block $switch-case
                           (br_table $switch-case0 $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-default $switch-case $switch-default
-                            (i32.sub
-                              (i32.shr_s
-                                (i32.shl
-                                  (get_local $7)
-                                  (i32.const 24)
-                                )
+                            (i32.shr_s
+                              (i32.shl
+                                (get_local $7)
                                 (i32.const 24)
                               )
-                              (i32.const 0)
+                              (i32.const 24)
                             )
                           )
                         )
                         (set_local $6
                           (get_local $10)
                         )
-                        (br $jumpthreading$inner$1)
+                        (br $__rjti$1)
                       )
                       (set_local $6
                         (get_local $10)
@@ -2622,21 +2569,15 @@
                 (i32.lt_u
                   (tee_local $8
                     (i32.add
-                      (i32.shr_s
-                        (i32.shl
-                          (tee_local $11
-                            (i32.load8_s
-                              (tee_local $10
-                                (i32.add
-                                  (get_local $6)
-                                  (i32.const 1)
-                                )
-                              )
+                      (tee_local $11
+                        (i32.load8_s
+                          (tee_local $10
+                            (i32.add
+                              (get_local $6)
+                              (i32.const 1)
                             )
                           )
-                          (i32.const 24)
                         )
-                        (i32.const 24)
                       )
                       (i32.const -48)
                     )
@@ -2762,21 +2703,15 @@
                       (i32.eq
                         (i32.and
                           (tee_local $6
-                            (i32.shr_s
-                              (i32.shl
-                                (tee_local $1
-                                  (i32.load8_s
-                                    (tee_local $10
-                                      (i32.add
-                                        (get_local $10)
-                                        (i32.const 1)
-                                      )
-                                    )
+                            (tee_local $1
+                              (i32.load8_s
+                                (tee_local $10
+                                  (i32.add
+                                    (get_local $10)
+                                    (i32.const 1)
                                   )
                                 )
-                                (i32.const 24)
                               )
-                              (i32.const 24)
                             )
                           )
                           (i32.const -32)
@@ -2800,20 +2735,17 @@
             (block $do-once5
               (if
                 (i32.eq
-                  (i32.shr_s
-                    (i32.shl
-                      (get_local $6)
-                      (i32.const 24)
-                    )
-                    (i32.const 24)
+                  (i32.and
+                    (get_local $6)
+                    (i32.const 255)
                   )
                   (i32.const 42)
                 )
                 (block
                   (set_local $10
-                    (block $jumpthreading$outer$0 i32
-                      (block $jumpthreading$inner$0
-                        (br_if $jumpthreading$inner$0
+                    (block $__rjto$0 i32
+                      (block $__rjti$0
+                        (br_if $__rjti$0
                           (i32.ge_u
                             (tee_local $11
                               (i32.add
@@ -2831,7 +2763,7 @@
                             (i32.const 10)
                           )
                         )
-                        (br_if $jumpthreading$inner$0
+                        (br_if $__rjti$0
                           (i32.ne
                             (i32.load8_s offset=2
                               (get_local $10)
@@ -2871,7 +2803,7 @@
                             (get_local $6)
                           )
                         )
-                        (br $jumpthreading$outer$0
+                        (br $__rjto$0
                           (i32.add
                             (get_local $10)
                             (i32.const 3)
@@ -3073,21 +3005,15 @@
                   (block i32
                     (if
                       (i32.ne
-                        (i32.shr_s
-                          (i32.shl
-                            (tee_local $8
-                              (i32.load8_s
-                                (tee_local $6
-                                  (i32.add
-                                    (get_local $10)
-                                    (i32.const 1)
-                                  )
-                                )
+                        (tee_local $8
+                          (i32.load8_s
+                            (tee_local $6
+                              (i32.add
+                                (get_local $10)
+                                (i32.const 1)
                               )
                             )
-                            (i32.const 24)
                           )
-                          (i32.const 24)
                         )
                         (i32.const 42)
                       )
@@ -3096,13 +3022,7 @@
                           (i32.lt_u
                             (tee_local $9
                               (i32.add
-                                (i32.shr_s
-                                  (i32.shl
-                                    (get_local $8)
-                                    (i32.const 24)
-                                  )
-                                  (i32.const 24)
-                                )
+                                (get_local $8)
                                 (i32.const -48)
                               )
                             )
@@ -3356,12 +3276,9 @@
             )
             (if
               (i32.eqz
-                (i32.shr_s
-                  (i32.shl
-                    (get_local $13)
-                    (i32.const 24)
-                  )
-                  (i32.const 24)
+                (i32.and
+                  (get_local $13)
+                  (i32.const 255)
                 )
               )
               (block
@@ -3377,16 +3294,13 @@
                 (i32.const -1)
               )
             )
-            (block $jumpthreading$outer$2
-              (block $jumpthreading$inner$2
+            (block $__rjto$2
+              (block $__rjti$2
                 (if
                   (i32.eq
-                    (i32.shr_s
-                      (i32.shl
-                        (get_local $13)
-                        (i32.const 24)
-                      )
-                      (i32.const 24)
+                    (i32.and
+                      (get_local $13)
+                      (i32.const 255)
                     )
                     (i32.const 19)
                   )
@@ -3398,7 +3312,7 @@
                       )
                       (br $label$break$L1)
                     )
-                    (br $jumpthreading$inner$2)
+                    (br $__rjti$2)
                   )
                   (block
                     (if
@@ -3439,7 +3353,7 @@
                           (get_local $8)
                           (get_local $13)
                         )
-                        (br $jumpthreading$inner$2)
+                        (br $__rjti$2)
                       )
                     )
                     (if
@@ -3460,7 +3374,7 @@
                     )
                   )
                 )
-                (br $jumpthreading$outer$2)
+                (br $__rjto$2)
               )
               (if
                 (i32.eqz
@@ -3492,13 +3406,13 @@
                 )
               )
             )
-            (block $jumpthreading$outer$8
-              (block $jumpthreading$inner$8
-                (block $jumpthreading$inner$7
-                  (block $jumpthreading$inner$6
-                    (block $jumpthreading$inner$5
-                      (block $jumpthreading$inner$4
-                        (block $jumpthreading$inner$3
+            (block $__rjto$8
+              (block $__rjti$8
+                (block $__rjti$7
+                  (block $__rjti$6
+                    (block $__rjti$5
+                      (block $__rjti$4
+                        (block $__rjti$3
                           (block $switch-default120
                             (block $switch-case42
                               (block $switch-case41
@@ -3553,10 +3467,7 @@
                                                               (block $switch-case20
                                                                 (block $switch-case19
                                                                   (br_table $switch-case19 $switch-case20 $switch-case21 $switch-case22 $switch-case23 $switch-default26 $switch-case24 $switch-case25 $switch-default26
-                                                                    (i32.sub
-                                                                      (get_local $9)
-                                                                      (i32.const 0)
-                                                                    )
+                                                                    (get_local $9)
                                                                   )
                                                                 )
                                                                 (i32.store
@@ -3714,12 +3625,12 @@
                                                 (set_local $18
                                                   (i32.const 120)
                                                 )
-                                                (br $jumpthreading$inner$3)
+                                                (br $__rjti$3)
                                               )
                                               (set_local $7
                                                 (get_local $11)
                                               )
-                                              (br $jumpthreading$inner$3)
+                                              (br $__rjti$3)
                                             )
                                             (if
                                               (i32.and
@@ -3828,7 +3739,7 @@
                                                 (set_local $9
                                                   (i32.const 4091)
                                                 )
-                                                (br $jumpthreading$inner$8)
+                                                (br $__rjti$8)
                                               )
                                               (block
                                                 (set_local $5
@@ -3843,7 +3754,7 @@
                                                 (set_local $9
                                                   (i32.const 4091)
                                                 )
-                                                (br $jumpthreading$inner$8)
+                                                (br $__rjti$8)
                                               )
                                             )
                                           )
@@ -3889,7 +3800,7 @@
                                               (set_local $9
                                                 (i32.const 4091)
                                               )
-                                              (br $jumpthreading$inner$4)
+                                              (br $__rjti$4)
                                             )
                                           )
                                           (if
@@ -3904,7 +3815,7 @@
                                               (set_local $9
                                                 (i32.const 4092)
                                               )
-                                              (br $jumpthreading$inner$4)
+                                              (br $__rjti$4)
                                             )
                                             (block
                                               (set_local $8
@@ -3922,7 +3833,7 @@
                                                   (get_local $9)
                                                 )
                                               )
-                                              (br $jumpthreading$inner$4)
+                                              (br $__rjti$4)
                                             )
                                           )
                                         )
@@ -3944,7 +3855,7 @@
                                         (set_local $9
                                           (i32.const 4091)
                                         )
-                                        (br $jumpthreading$inner$4)
+                                        (br $__rjti$4)
                                       )
                                       (set_local $5
                                         (get_local $19)
@@ -3973,7 +3884,7 @@
                                       (set_local $5
                                         (get_local $22)
                                       )
-                                      (br $jumpthreading$outer$8)
+                                      (br $__rjto$8)
                                     )
                                     (set_local $5
                                       (call $_strerror
@@ -3982,7 +3893,7 @@
                                         )
                                       )
                                     )
-                                    (br $jumpthreading$inner$5)
+                                    (br $__rjti$5)
                                   )
                                   (set_local $5
                                     (select
@@ -3995,7 +3906,7 @@
                                       (get_local $5)
                                     )
                                   )
-                                  (br $jumpthreading$inner$5)
+                                  (br $__rjti$5)
                                 )
                                 (set_local $5
                                   (get_local $19)
@@ -4017,7 +3928,7 @@
                                 (set_local $8
                                   (i32.const -1)
                                 )
-                                (br $jumpthreading$inner$6)
+                                (br $__rjti$6)
                               )
                               (if
                                 (get_local $6)
@@ -4025,7 +3936,7 @@
                                   (set_local $8
                                     (get_local $6)
                                   )
-                                  (br $jumpthreading$inner$6)
+                                  (br $__rjti$6)
                                 )
                                 (block
                                   (call $_pad
@@ -4038,7 +3949,7 @@
                                   (set_local $7
                                     (i32.const 0)
                                   )
-                                  (br $jumpthreading$inner$7)
+                                  (br $__rjti$7)
                                 )
                               )
                             )
@@ -5196,18 +5107,15 @@
                                                     (i32.add
                                                       (i32.add
                                                         (get_local $8)
-                                                        (i32.const 4)
-                                                      )
-                                                      (i32.shl
-                                                        (i32.add
+                                                        (i32.shl
                                                           (i32.div_s
                                                             (get_local $13)
                                                             (i32.const 9)
                                                           )
-                                                          (i32.const -1024)
+                                                          (i32.const 2)
                                                         )
-                                                        (i32.const 2)
                                                       )
+                                                      (i32.const -4092)
                                                     )
                                                   )
                                                 )
@@ -5524,10 +5432,7 @@
                                                               (tee_local $5
                                                                 (i32.add
                                                                   (i32.xor
-                                                                    (i32.and
-                                                                      (get_local $32)
-                                                                      (i32.const 1)
-                                                                    )
+                                                                    (get_local $32)
                                                                     (i32.const 1)
                                                                   )
                                                                   (get_local $17)
@@ -6530,7 +6435,7 @@
                           (set_local $5
                             (get_local $22)
                           )
-                          (br $jumpthreading$outer$8)
+                          (br $__rjto$8)
                         )
                         (set_local $9
                           (i32.and
@@ -6567,7 +6472,7 @@
                             (set_local $9
                               (i32.const 4091)
                             )
-                            (br $jumpthreading$inner$8)
+                            (br $__rjti$8)
                           )
                           (block
                             (set_local $5
@@ -6651,7 +6556,7 @@
                                 (set_local $9
                                   (i32.const 4091)
                                 )
-                                (br $jumpthreading$inner$8)
+                                (br $__rjti$8)
                               )
                               (block
                                 (set_local $8
@@ -6666,12 +6571,11 @@
                                     (i32.const 4091)
                                   )
                                 )
-                                (br $jumpthreading$inner$8)
+                                (br $__rjti$8)
                               )
                             )
                           )
                         )
-                        (br $jumpthreading$outer$8)
                       )
                       (set_local $5
                         (call $_fmt_u
@@ -6683,7 +6587,7 @@
                       (set_local $7
                         (get_local $11)
                       )
-                      (br $jumpthreading$inner$8)
+                      (br $__rjti$8)
                     )
                     (set_local $18
                       (i32.eqz
@@ -6728,7 +6632,7 @@
                         (get_local $18)
                       )
                     )
-                    (br $jumpthreading$outer$8)
+                    (br $__rjto$8)
                   )
                   (set_local $5
                     (i32.const 0)
@@ -6834,7 +6738,7 @@
                             (set_local $7
                               (get_local $5)
                             )
-                            (br $jumpthreading$inner$7)
+                            (br $__rjti$7)
                           )
                         )
                         (if
@@ -6856,7 +6760,7 @@
                             (set_local $7
                               (get_local $5)
                             )
-                            (br $jumpthreading$inner$7)
+                            (br $__rjti$7)
                           )
                         )
                         (if
@@ -6891,17 +6795,16 @@
                         (set_local $7
                           (get_local $5)
                         )
-                        (br $jumpthreading$inner$7)
+                        (br $__rjti$7)
                       )
                     )
                     (block
                       (set_local $7
                         (i32.const 0)
                       )
-                      (br $jumpthreading$inner$7)
+                      (br $__rjti$7)
                     )
                   )
-                  (br $jumpthreading$outer$8)
                 )
                 (call $_pad
                   (get_local $0)
@@ -7962,22 +7865,19 @@
                               (tee_local $2
                                 (i32.add
                                   (i32.shl
-                                    (i32.shl
-                                      (tee_local $4
-                                        (i32.add
-                                          (i32.xor
-                                            (i32.and
-                                              (get_local $5)
-                                              (i32.const 1)
-                                            )
+                                    (tee_local $4
+                                      (i32.add
+                                        (i32.xor
+                                          (i32.and
+                                            (get_local $5)
                                             (i32.const 1)
                                           )
-                                          (get_local $13)
+                                          (i32.const 1)
                                         )
+                                        (get_local $13)
                                       )
-                                      (i32.const 1)
                                     )
-                                    (i32.const 2)
+                                    (i32.const 3)
                                   )
                                   (i32.const 216)
                                 )
@@ -8143,43 +8043,27 @@
                                   (tee_local $10
                                     (i32.add
                                       (i32.shl
-                                        (i32.shl
-                                          (tee_local $5
-                                            (i32.add
+                                        (tee_local $5
+                                          (i32.add
+                                            (i32.or
                                               (i32.or
                                                 (i32.or
                                                   (i32.or
-                                                    (i32.or
-                                                      (tee_local $3
-                                                        (i32.and
-                                                          (i32.shr_u
-                                                            (tee_local $7
-                                                              (i32.shr_u
-                                                                (get_local $3)
-                                                                (get_local $10)
-                                                              )
-                                                            )
-                                                            (i32.const 5)
-                                                          )
-                                                          (i32.const 8)
-                                                        )
-                                                      )
-                                                      (get_local $10)
-                                                    )
                                                     (tee_local $3
                                                       (i32.and
                                                         (i32.shr_u
                                                           (tee_local $7
                                                             (i32.shr_u
-                                                              (get_local $7)
                                                               (get_local $3)
+                                                              (get_local $10)
                                                             )
                                                           )
-                                                          (i32.const 2)
+                                                          (i32.const 5)
                                                         )
-                                                        (i32.const 4)
+                                                        (i32.const 8)
                                                       )
                                                     )
+                                                    (get_local $10)
                                                   )
                                                   (tee_local $3
                                                     (i32.and
@@ -8190,9 +8074,9 @@
                                                             (get_local $3)
                                                           )
                                                         )
-                                                        (i32.const 1)
+                                                        (i32.const 2)
                                                       )
-                                                      (i32.const 2)
+                                                      (i32.const 4)
                                                     )
                                                   )
                                                 )
@@ -8207,19 +8091,32 @@
                                                       )
                                                       (i32.const 1)
                                                     )
-                                                    (i32.const 1)
+                                                    (i32.const 2)
                                                   )
                                                 )
                                               )
-                                              (i32.shr_u
-                                                (get_local $7)
-                                                (get_local $3)
+                                              (tee_local $3
+                                                (i32.and
+                                                  (i32.shr_u
+                                                    (tee_local $7
+                                                      (i32.shr_u
+                                                        (get_local $7)
+                                                        (get_local $3)
+                                                      )
+                                                    )
+                                                    (i32.const 1)
+                                                  )
+                                                  (i32.const 1)
+                                                )
                                               )
                                             )
+                                            (i32.shr_u
+                                              (get_local $7)
+                                              (get_local $3)
+                                            )
                                           )
-                                          (i32.const 1)
                                         )
-                                        (i32.const 2)
+                                        (i32.const 3)
                                       )
                                       (i32.const 216)
                                     )
@@ -8343,16 +8240,13 @@
                       (set_local $4
                         (i32.add
                           (i32.shl
-                            (i32.shl
-                              (tee_local $0
-                                (i32.shr_u
-                                  (get_local $8)
-                                  (i32.const 3)
-                                )
+                            (tee_local $0
+                              (i32.shr_u
+                                (get_local $8)
+                                (i32.const 3)
                               )
-                              (i32.const 1)
                             )
-                            (i32.const 2)
+                            (i32.const 3)
                           )
                           (i32.const 216)
                         )
@@ -9054,16 +8948,13 @@
                           (set_local $2
                             (i32.add
                               (i32.shl
-                                (i32.shl
-                                  (tee_local $0
-                                    (i32.shr_u
-                                      (get_local $0)
-                                      (i32.const 3)
-                                    )
+                                (tee_local $0
+                                  (i32.shr_u
+                                    (get_local $0)
+                                    (i32.const 3)
                                   )
-                                  (i32.const 1)
                                 )
-                                (i32.const 2)
+                                (i32.const 3)
                               )
                               (i32.const 216)
                             )
@@ -9302,9 +9193,9 @@
                     (get_local $2)
                   )
                 )
-                (block $jumpthreading$outer$3
-                  (block $jumpthreading$inner$3
-                    (block $jumpthreading$inner$2
+                (block $__rjto$3
+                  (block $__rjti$3
+                    (block $__rjti$2
                       (if
                         (tee_local $0
                           (i32.load offset=480
@@ -9370,7 +9261,7 @@
                                   (set_local $3
                                     (get_local $0)
                                   )
-                                  (br $jumpthreading$inner$3)
+                                  (br $__rjti$3)
                                 )
                                 (block
                                   (set_local $3
@@ -9421,13 +9312,10 @@
                               (i32.shl
                                 (get_local $8)
                                 (i32.xor
-                                  (i32.and
-                                    (tee_local $6
-                                      (i32.eqz
-                                        (get_local $9)
-                                      )
+                                  (tee_local $6
+                                    (i32.eqz
+                                      (get_local $9)
                                     )
-                                    (i32.const 1)
                                   )
                                   (i32.const 1)
                                 )
@@ -9442,7 +9330,7 @@
                                 (set_local $0
                                   (get_local $1)
                                 )
-                                (br $jumpthreading$inner$2)
+                                (br $__rjti$2)
                               )
                               (block
                                 (set_local $6
@@ -9615,13 +9503,13 @@
                         (set_local $3
                           (get_local $4)
                         )
-                        (br $jumpthreading$inner$3)
+                        (br $__rjti$3)
                       )
                       (set_local $4
                         (get_local $0)
                       )
                     )
-                    (br $jumpthreading$outer$3)
+                    (br $__rjto$3)
                   )
                   (loop $while-in16
                     (set_local $9
@@ -10117,11 +10005,8 @@
                                 (set_local $3
                                   (i32.add
                                     (i32.shl
-                                      (i32.shl
-                                        (get_local $0)
-                                        (i32.const 1)
-                                      )
-                                      (i32.const 2)
+                                      (get_local $0)
+                                      (i32.const 3)
                                     )
                                     (i32.const 216)
                                   )
@@ -10393,11 +10278,11 @@
                                 (get_local $2)
                               )
                             )
-                            (block $jumpthreading$outer$1
-                              (block $jumpthreading$inner$1
-                                (block $jumpthreading$inner$0
+                            (block $__rjto$1
+                              (block $__rjti$1
+                                (block $__rjti$0
                                   (loop $while-in28
-                                    (br_if $jumpthreading$inner$1
+                                    (br_if $__rjti$1
                                       (i32.eq
                                         (i32.and
                                           (i32.load offset=4
@@ -10414,7 +10299,7 @@
                                         (i32.const 1)
                                       )
                                     )
-                                    (br_if $jumpthreading$inner$0
+                                    (br_if $__rjti$0
                                       (i32.eqz
                                         (tee_local $1
                                           (i32.load
@@ -10474,7 +10359,7 @@
                                     (br $do-once25)
                                   )
                                 )
-                                (br $jumpthreading$outer$1)
+                                (br $__rjto$1)
                               )
                               (if
                                 (i32.and
@@ -10839,8 +10724,8 @@
         (i32.const 48)
       )
     )
-    (block $jumpthreading$outer$13
-      (block $jumpthreading$inner$13
+    (block $__rjto$13
+      (block $__rjti$13
         (if
           (i32.eqz
             (i32.and
@@ -10852,9 +10737,9 @@
           )
           (block
             (block $label$break$L279
-              (block $jumpthreading$inner$5
-                (block $jumpthreading$inner$4
-                  (br_if $jumpthreading$inner$4
+              (block $__rjti$5
+                (block $__rjti$4
+                  (br_if $__rjti$4
                     (i32.eqz
                       (tee_local $4
                         (i32.load
@@ -10907,7 +10792,7 @@
                           )
                         )
                       )
-                      (br $jumpthreading$inner$4)
+                      (br $__rjti$4)
                     )
                   )
                   (if
@@ -10941,7 +10826,7 @@
                           )
                         )
                       )
-                      (br_if $jumpthreading$inner$13
+                      (br_if $__rjti$13
                         (i32.ne
                           (get_local $1)
                           (i32.const -1)
@@ -10954,7 +10839,7 @@
                         (set_local $1
                           (get_local $3)
                         )
-                        (br $jumpthreading$inner$5)
+                        (br $__rjti$5)
                       )
                     )
                   )
@@ -11047,7 +10932,7 @@
                             )
                           )
                         )
-                        (br_if $jumpthreading$inner$13
+                        (br_if $__rjti$13
                           (i32.eq
                             (tee_local $2
                               (call $_sbrk
@@ -11060,7 +10945,7 @@
                         (set_local $1
                           (get_local $3)
                         )
-                        (br $jumpthreading$inner$5)
+                        (br $__rjti$5)
                       )
                     )
                   )
@@ -11152,7 +11037,7 @@
                   (set_local $1
                     (get_local $2)
                   )
-                  (br $jumpthreading$inner$13)
+                  (br $__rjti$13)
                 )
               )
             )
@@ -11197,7 +11082,7 @@
                 )
               )
             )
-            (br_if $jumpthreading$inner$13
+            (br_if $__rjti$13
               (i32.gt_u
                 (tee_local $3
                   (i32.sub
@@ -11213,7 +11098,7 @@
             )
           )
         )
-        (br $jumpthreading$outer$13)
+        (br $__rjto$13)
       )
       (i32.store
         (i32.const 608)
@@ -11249,10 +11134,10 @@
             (set_local $2
               (i32.const 624)
             )
-            (block $jumpthreading$outer$10
-              (block $jumpthreading$inner$10
+            (block $__rjto$10
+              (block $__rjti$10
                 (loop $while-in45
-                  (br_if $jumpthreading$inner$10
+                  (br_if $__rjti$10
                     (i32.eq
                       (get_local $1)
                       (i32.add
@@ -11282,7 +11167,7 @@
                     )
                   )
                 )
-                (br $jumpthreading$outer$10)
+                (br $__rjto$10)
               )
               (if
                 (i32.eqz
@@ -11410,8 +11295,8 @@
             (set_local $2
               (i32.const 624)
             )
-            (block $jumpthreading$outer$11
-              (block $jumpthreading$inner$11
+            (block $__rjto$11
+              (block $__rjti$11
                 (loop $while-in47
                   (if
                     (i32.eq
@@ -11424,7 +11309,7 @@
                       (set_local $5
                         (get_local $2)
                       )
-                      (br $jumpthreading$inner$11)
+                      (br $__rjti$11)
                     )
                   )
                   (br_if $while-in47
@@ -11438,7 +11323,7 @@
                     (i32.const 624)
                   )
                 )
-                (br $jumpthreading$outer$11)
+                (br $__rjto$11)
               )
               (if
                 (i32.and
@@ -11660,11 +11545,8 @@
                                                 (tee_local $0
                                                   (i32.add
                                                     (i32.shl
-                                                      (i32.shl
-                                                        (get_local $1)
-                                                        (i32.const 1)
-                                                      )
-                                                      (i32.const 2)
+                                                      (get_local $1)
+                                                      (i32.const 3)
                                                     )
                                                     (i32.const 216)
                                                   )
@@ -12152,11 +12034,8 @@
                             (set_local $3
                               (i32.add
                                 (i32.shl
-                                  (i32.shl
-                                    (get_local $0)
-                                    (i32.const 1)
-                                  )
-                                  (i32.const 2)
+                                  (get_local $0)
+                                  (i32.const 3)
                                 )
                                 (i32.const 216)
                               )
@@ -12439,11 +12318,11 @@
                             (get_local $3)
                           )
                         )
-                        (block $jumpthreading$outer$7
-                          (block $jumpthreading$inner$7
-                            (block $jumpthreading$inner$6
+                        (block $__rjto$7
+                          (block $__rjti$7
+                            (block $__rjti$6
                               (loop $while-in68
-                                (br_if $jumpthreading$inner$7
+                                (br_if $__rjti$7
                                   (i32.eq
                                     (i32.and
                                       (i32.load offset=4
@@ -12460,7 +12339,7 @@
                                     (i32.const 1)
                                   )
                                 )
-                                (br_if $jumpthreading$inner$6
+                                (br_if $__rjti$6
                                   (i32.eqz
                                     (tee_local $1
                                       (i32.load
@@ -12520,7 +12399,7 @@
                                 (br $do-once48)
                               )
                             )
-                            (br $jumpthreading$outer$7)
+                            (br $__rjto$7)
                           )
                           (if
                             (i32.and
@@ -12847,11 +12726,8 @@
                     (set_local $2
                       (i32.add
                         (i32.shl
-                          (i32.shl
-                            (get_local $1)
-                            (i32.const 1)
-                          )
-                          (i32.const 2)
+                          (get_local $1)
+                          (i32.const 3)
                         )
                         (i32.const 216)
                       )
@@ -13118,11 +12994,11 @@
                     (get_local $2)
                   )
                 )
-                (block $jumpthreading$outer$9
-                  (block $jumpthreading$inner$9
-                    (block $jumpthreading$inner$8
+                (block $__rjto$9
+                  (block $__rjti$9
+                    (block $__rjti$8
                       (loop $while-in74
-                        (br_if $jumpthreading$inner$9
+                        (br_if $__rjti$9
                           (i32.eq
                             (i32.and
                               (i32.load offset=4
@@ -13139,7 +13015,7 @@
                             (i32.const 1)
                           )
                         )
-                        (br_if $jumpthreading$inner$8
+                        (br_if $__rjti$8
                           (i32.eqz
                             (tee_local $3
                               (i32.load
@@ -13199,7 +13075,7 @@
                         (br $do-once40)
                       )
                     )
-                    (br $jumpthreading$outer$9)
+                    (br $__rjto$9)
                   )
                   (if
                     (i32.and
@@ -13303,11 +13179,8 @@
                 (tee_local $4
                   (i32.add
                     (i32.shl
-                      (i32.shl
-                        (get_local $2)
-                        (i32.const 1)
-                      )
-                      (i32.const 2)
+                      (get_local $2)
+                      (i32.const 3)
                     )
                     (i32.const 216)
                   )
@@ -13659,11 +13532,8 @@
                   (tee_local $3
                     (i32.add
                       (i32.shl
-                        (i32.shl
-                          (get_local $5)
-                          (i32.const 1)
-                        )
-                        (i32.const 2)
+                        (get_local $5)
+                        (i32.const 3)
                       )
                       (i32.const 216)
                     )
@@ -14323,11 +14193,8 @@
                   (tee_local $0
                     (i32.add
                       (i32.shl
-                        (i32.shl
-                          (get_local $3)
-                          (i32.const 1)
-                        )
-                        (i32.const 2)
+                        (get_local $3)
+                        (i32.const 3)
                       )
                       (i32.const 216)
                     )
@@ -14813,11 +14680,8 @@
         (set_local $1
           (i32.add
             (i32.shl
-              (i32.shl
-                (get_local $0)
-                (i32.const 1)
-              )
-              (i32.const 2)
+              (get_local $0)
+              (i32.const 3)
             )
             (i32.const 216)
           )
@@ -15057,11 +14921,11 @@
               (get_local $4)
             )
           )
-          (block $jumpthreading$outer$1
-            (block $jumpthreading$inner$1
-              (block $jumpthreading$inner$0
+          (block $__rjto$1
+            (block $__rjti$1
+              (block $__rjti$0
                 (loop $while-in15
-                  (br_if $jumpthreading$inner$1
+                  (br_if $__rjti$1
                     (i32.eq
                       (i32.and
                         (i32.load offset=4
@@ -15078,7 +14942,7 @@
                       (i32.const 1)
                     )
                   )
-                  (br_if $jumpthreading$inner$0
+                  (br_if $__rjti$0
                     (i32.eqz
                       (tee_local $1
                         (i32.load
@@ -15138,7 +15002,7 @@
                   (br $do-once12)
                 )
               )
-              (br $jumpthreading$outer$1)
+              (br $__rjto$1)
             )
             (if
               (i32.and
@@ -15791,12 +15655,9 @@
   (func $dynCall_ii (param $0 i32) (param $1 i32) (result i32)
     (call_indirect $FUNCSIG$ii
       (get_local $1)
-      (i32.add
-        (i32.and
-          (get_local $0)
-          (i32.const 1)
-        )
-        (i32.const 0)
+      (i32.and
+        (get_local $0)
+        (i32.const 1)
       )
     )
   )

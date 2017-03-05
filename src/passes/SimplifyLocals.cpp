@@ -52,7 +52,7 @@ namespace wasm {
 
 // Helper classes
 
-struct SetLocalRemover : public PostWalker<SetLocalRemover, Visitor<SetLocalRemover>> {
+struct SetLocalRemover : public PostWalker<SetLocalRemover> {
   std::vector<Index>* numGetLocals;
 
   void visitSetLocal(SetLocal *curr) {
@@ -70,7 +70,7 @@ struct SetLocalRemover : public PostWalker<SetLocalRemover, Visitor<SetLocalRemo
 
 // Main class
 
-struct SimplifyLocals : public WalkerPass<LinearExecutionWalker<SimplifyLocals, Visitor<SimplifyLocals>>> {
+struct SimplifyLocals : public WalkerPass<LinearExecutionWalker<SimplifyLocals>> {
   bool isFunctionParallel() override { return true; }
 
   Pass* create() override { return new SimplifyLocals(allowTee, allowStructure); }
@@ -84,9 +84,7 @@ struct SimplifyLocals : public WalkerPass<LinearExecutionWalker<SimplifyLocals, 
     Expression** item;
     EffectAnalyzer effects;
 
-    SinkableInfo(Expression** item) : item(item) {
-      effects.walk(*item);
-    }
+    SinkableInfo(Expression** item, PassOptions& passOptions) : item(item), effects(passOptions, *item) {}
   };
 
   // a list of sinkables in a linear execution trace
@@ -246,7 +244,7 @@ struct SimplifyLocals : public WalkerPass<LinearExecutionWalker<SimplifyLocals, 
   static void visitPre(SimplifyLocals* self, Expression** currp) {
     Expression* curr = *currp;
 
-    EffectAnalyzer effects;
+    EffectAnalyzer effects(self->getPassOptions());
     if (effects.checkPre(curr)) {
       self->checkInvalidations(effects);
     }
@@ -274,7 +272,7 @@ struct SimplifyLocals : public WalkerPass<LinearExecutionWalker<SimplifyLocals, 
       }
     }
 
-    EffectAnalyzer effects;
+    EffectAnalyzer effects(self->getPassOptions());
     if (effects.checkPost(*currp)) {
       self->checkInvalidations(effects);
     }
@@ -282,7 +280,7 @@ struct SimplifyLocals : public WalkerPass<LinearExecutionWalker<SimplifyLocals, 
     if (set && self->canSink(set)) {
       Index index = set->index;
       assert(self->sinkables.count(index) == 0);
-      self->sinkables.emplace(std::make_pair(index, SinkableInfo(currp)));
+      self->sinkables.emplace(std::make_pair(index, SinkableInfo(currp, self->getPassOptions())));
     }
 
     self->expressionStack.pop_back();
@@ -430,7 +428,7 @@ struct SimplifyLocals : public WalkerPass<LinearExecutionWalker<SimplifyLocals, 
       self->pushTask(SimplifyLocals::doNoteIfElseCondition, currp);
       self->pushTask(SimplifyLocals::scan, &curr->cast<If>()->condition);
     } else {
-      WalkerPass<LinearExecutionWalker<SimplifyLocals, Visitor<SimplifyLocals>>>::scan(self, currp);
+      WalkerPass<LinearExecutionWalker<SimplifyLocals>>::scan(self, currp);
     }
 
     self->pushTask(visitPre, currp);
@@ -452,7 +450,7 @@ struct SimplifyLocals : public WalkerPass<LinearExecutionWalker<SimplifyLocals, 
     do {
       anotherCycle = false;
       // main operation
-      WalkerPass<LinearExecutionWalker<SimplifyLocals, Visitor<SimplifyLocals>>>::doWalkFunction(func);
+      WalkerPass<LinearExecutionWalker<SimplifyLocals>>::doWalkFunction(func);
       // enlarge blocks that were marked, for the next round
       if (blocksToEnlarge.size() > 0) {
         for (auto* block : blocksToEnlarge) {

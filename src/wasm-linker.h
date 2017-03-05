@@ -25,6 +25,7 @@
 #define WASM_WASM_LINK_H
 
 #include "support/archive.h"
+#include "support/name.h"
 #include "support/utilities.h"
 #include "wasm.h"
 
@@ -58,6 +59,7 @@ class LinkerObject {
   struct SymbolInfo {
     std::unordered_set<cashew::IString> implementedFunctions;
     std::unordered_set<cashew::IString> undefinedFunctions;
+    std::unordered_set<cashew::IString> importedObjects;
     // TODO: it's not clear that this really belongs here.
     std::unordered_map<cashew::IString, SymbolAlias> aliasedSymbols;
 
@@ -70,6 +72,8 @@ class LinkerObject {
       }
       implementedFunctions.insert(other.implementedFunctions.begin(),
                                   other.implementedFunctions.end());
+      importedObjects.insert(other.importedObjects.begin(),
+                             other.importedObjects.end());
       aliasedSymbols.insert(other.aliasedSymbols.begin(),
                             other.aliasedSymbols.end());
     }
@@ -86,16 +90,18 @@ class LinkerObject {
     globls.push_back(name);
   }
 
-  void addRelocation(Relocation::Kind kind, uint32_t* target, Name name, int addend) {
-    relocations.emplace_back(new Relocation(kind, target, name, addend));
-  }
-
-  Relocation* getCurrentRelocation() {
-    return relocations.back().get();
+  // This takes ownership of the added Relocation
+  void addRelocation(Relocation* relocation) {
+    relocations.emplace_back(relocation);
   }
 
   bool isFunctionImplemented(Name name) {
     return symbolInfo.implementedFunctions.count(name) != 0;
+  }
+
+  // An object is considered implemented if it is not imported
+  bool isObjectImplemented(Name name) {
+    return symbolInfo.importedObjects.count(name) == 0;
   }
 
   // If name is an alias, return what it points to. Otherwise return name.
@@ -266,7 +272,8 @@ class Linker {
   // relocation for it to point to the top of the stack.
   void placeStackPointer(Address stackAllocation);
 
-  void ensureImport(Name target, std::string signature);
+  void ensureFunctionImport(Name target, std::string signature);
+  void ensureObjectImport(Name target);
 
   // Makes sure the table has a single segment, with offset 0,
   // to which we can add content.

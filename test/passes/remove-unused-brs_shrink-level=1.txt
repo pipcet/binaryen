@@ -4,7 +4,7 @@
   (type $2 (func (result i32)))
   (memory $0 256 256)
   (func $b14 (type $2) (result i32)
-    (block $topmost i32
+    (drop
       (select
         (block $block1 i32
           (i32.const 12)
@@ -13,6 +13,34 @@
           (i32.const 27)
         )
         (i32.const 1)
+      )
+    )
+    (drop
+      (if i32
+        (i32.const 1)
+        (i32.load
+          (i32.const 10)
+        )
+        (i32.const 27)
+      )
+    )
+    (drop
+      (if i32
+        (i32.const 1)
+        (i32.rem_s
+          (i32.const 11)
+          (i32.const 12)
+        )
+        (i32.const 27)
+      )
+    )
+    (drop
+      (if i32
+        (i32.const 1)
+        (i32.trunc_u/f64
+          (f64.const 12.34)
+        )
+        (i32.const 27)
       )
     )
   )
@@ -85,11 +113,11 @@
         (nop)
       )
     )
-    (block $out80
-      (br_if $out80
+    (block $out83
+      (br_if $out83
         (i32.const 1)
       )
-      (br_if $out80
+      (br_if $out83
         (call $b14)
       )
     )

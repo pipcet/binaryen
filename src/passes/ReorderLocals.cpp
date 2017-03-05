@@ -27,7 +27,7 @@
 
 namespace wasm {
 
-struct ReorderLocals : public WalkerPass<PostWalker<ReorderLocals, Visitor<ReorderLocals>>> {
+struct ReorderLocals : public WalkerPass<PostWalker<ReorderLocals>> {
   bool isFunctionParallel() override { return true; }
 
   Pass* create() override { return new ReorderLocals; }
@@ -42,7 +42,7 @@ struct ReorderLocals : public WalkerPass<PostWalker<ReorderLocals, Visitor<Reord
       newToOld.push_back(i);
     }
     // sort, keeping params in front (where they will not be moved)
-    sort(newToOld.begin(), newToOld.end(), [this, curr, &newToOld](Index a, Index b) -> bool {
+    sort(newToOld.begin(), newToOld.end(), [this, curr](Index a, Index b) -> bool {
       if (curr->isParam(a) && !curr->isParam(b)) return true;
       if (curr->isParam(b) && !curr->isParam(a)) return false;
       if (curr->isParam(b) && curr->isParam(a)) {
@@ -84,7 +84,7 @@ struct ReorderLocals : public WalkerPass<PostWalker<ReorderLocals, Visitor<Reord
       }
     }
     // apply the renaming to AST nodes
-    struct ReIndexer : public PostWalker<ReIndexer, Visitor<ReIndexer>> {
+    struct ReIndexer : public PostWalker<ReIndexer> {
       Function* func;
       std::vector<Index>& oldToNew;
 

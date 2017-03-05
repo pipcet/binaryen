@@ -35,40 +35,40 @@ namespace wasm {
 template<typename SubType, typename ReturnType = void>
 struct Visitor {
   // Expression visitors
-  ReturnType visitBlock(Block *curr) {}
-  ReturnType visitIf(If *curr) {}
-  ReturnType visitLoop(Loop *curr) {}
-  ReturnType visitBreak(Break *curr) {}
-  ReturnType visitSwitch(Switch *curr) {}
-  ReturnType visitCall(Call *curr) {}
-  ReturnType visitCallImport(CallImport *curr) {}
-  ReturnType visitCallIndirect(CallIndirect *curr) {}
-  ReturnType visitGetLocal(GetLocal *curr) {}
-  ReturnType visitSetLocal(SetLocal *curr) {}
-  ReturnType visitGetGlobal(GetGlobal *curr) {}
-  ReturnType visitSetGlobal(SetGlobal *curr) {}
-  ReturnType visitLoad(Load *curr) {}
-  ReturnType visitStore(Store *curr) {}
-  ReturnType visitConst(Const *curr) {}
-  ReturnType visitUnary(Unary *curr) {}
-  ReturnType visitBinary(Binary *curr) {}
-  ReturnType visitSelect(Select *curr) {}
-  ReturnType visitDrop(Drop *curr) {}
-  ReturnType visitReturn(Return *curr) {}
-  ReturnType visitHost(Host *curr) {}
-  ReturnType visitNop(Nop *curr) {}
-  ReturnType visitUnreachable(Unreachable *curr) {}
+  ReturnType visitBlock(Block* curr) {}
+  ReturnType visitIf(If* curr) {}
+  ReturnType visitLoop(Loop* curr) {}
+  ReturnType visitBreak(Break* curr) {}
+  ReturnType visitSwitch(Switch* curr) {}
+  ReturnType visitCall(Call* curr) {}
+  ReturnType visitCallImport(CallImport* curr) {}
+  ReturnType visitCallIndirect(CallIndirect* curr) {}
+  ReturnType visitGetLocal(GetLocal* curr) {}
+  ReturnType visitSetLocal(SetLocal* curr) {}
+  ReturnType visitGetGlobal(GetGlobal* curr) {}
+  ReturnType visitSetGlobal(SetGlobal* curr) {}
+  ReturnType visitLoad(Load* curr) {}
+  ReturnType visitStore(Store* curr) {}
+  ReturnType visitConst(Const* curr) {}
+  ReturnType visitUnary(Unary* curr) {}
+  ReturnType visitBinary(Binary* curr) {}
+  ReturnType visitSelect(Select* curr) {}
+  ReturnType visitDrop(Drop* curr) {}
+  ReturnType visitReturn(Return* curr) {}
+  ReturnType visitHost(Host* curr) {}
+  ReturnType visitNop(Nop* curr) {}
+  ReturnType visitUnreachable(Unreachable* curr) {}
   // Module-level visitors
-  ReturnType visitFunctionType(FunctionType *curr) {}
-  ReturnType visitImport(Import *curr) {}
-  ReturnType visitExport(Export *curr) {}
-  ReturnType visitGlobal(Global *curr) {}
-  ReturnType visitFunction(Function *curr) {}
-  ReturnType visitTable(Table *curr) {}
-  ReturnType visitMemory(Memory *curr) {}
-  ReturnType visitModule(Module *curr) {}
+  ReturnType visitFunctionType(FunctionType* curr) {}
+  ReturnType visitImport(Import* curr) {}
+  ReturnType visitExport(Export* curr) {}
+  ReturnType visitGlobal(Global* curr) {}
+  ReturnType visitFunction(Function* curr) {}
+  ReturnType visitTable(Table* curr) {}
+  ReturnType visitMemory(Memory* curr) {}
+  ReturnType visitModule(Module* curr) {}
 
-  ReturnType visit(Expression *curr) {
+  ReturnType visit(Expression* curr) {
     assert(curr);
 
     #define DELEGATE(CLASS_TO_VISIT) \
@@ -116,29 +116,29 @@ struct UnifiedExpressionVisitor : public Visitor<SubType> {
   ReturnType visitExpression(Expression* curr) {}
 
   // redirects
-  ReturnType visitBlock(Block *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitIf(If *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitLoop(Loop *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitBreak(Break *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitSwitch(Switch *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitCall(Call *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitCallImport(CallImport *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitCallIndirect(CallIndirect *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitGetLocal(GetLocal *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitSetLocal(SetLocal *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitGetGlobal(GetGlobal *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitSetGlobal(SetGlobal *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitLoad(Load *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitStore(Store *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitConst(Const *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitUnary(Unary *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitBinary(Binary *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitSelect(Select *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitDrop(Drop *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitReturn(Return *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitHost(Host *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitNop(Nop *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
-  ReturnType visitUnreachable(Unreachable *curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitBlock(Block* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitIf(If* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitLoop(Loop* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitBreak(Break* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitSwitch(Switch* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitCall(Call* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitCallImport(CallImport* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitCallIndirect(CallIndirect* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitGetLocal(GetLocal* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitSetLocal(SetLocal* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitGetGlobal(GetGlobal* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitSetGlobal(SetGlobal* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitLoad(Load* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitStore(Store* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitConst(Const* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitUnary(Unary* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitBinary(Binary* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitSelect(Select* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitDrop(Drop* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitReturn(Return* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitHost(Host* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitNop(Nop* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
+  ReturnType visitUnreachable(Unreachable* curr) { return static_cast<SubType*>(this)->visitExpression(curr); }
 };
 
 //
@@ -156,7 +156,7 @@ struct Walker : public VisitorType {
   // Note that the visit*() for the result node is not called for you (i.e.,
   // just one visit*() method is called by the traversal; if you replace a node,
   // and you want to process the output, you must do that explicitly).
-  Expression* replaceCurrent(Expression *expression) {
+  Expression* replaceCurrent(Expression* expression) {
     return replace = expression;
   }
 
@@ -172,10 +172,16 @@ struct Walker : public VisitorType {
 
   // Walk starting
 
+  void walkGlobal(Global* global) {
+    walk(global->init);
+    static_cast<SubType*>(this)->visitGlobal(global);
+  }
+
   void walkFunction(Function* func) {
     setFunction(func);
     static_cast<SubType*>(this)->doWalkFunction(func);
     static_cast<SubType*>(this)->visitFunction(func);
+    setFunction(nullptr);
   }
 
   // override this to provide custom functionality
@@ -183,14 +189,29 @@ struct Walker : public VisitorType {
     walk(func->body);
   }
 
-  void walkModule(Module *module) {
+  void walkTable(Table* table) {
+    for (auto& segment : table->segments) {
+      walk(segment.offset);
+    }
+    static_cast<SubType*>(this)->visitTable(table);
+  }
+
+  void walkMemory(Memory* memory) {
+    for (auto& segment : memory->segments) {
+      walk(segment.offset);
+    }
+    static_cast<SubType*>(this)->visitMemory(memory);
+  }
+
+  void walkModule(Module* module) {
     setModule(module);
     static_cast<SubType*>(this)->doWalkModule(module);
     static_cast<SubType*>(this)->visitModule(module);
+    setModule(nullptr);
   }
 
   // override this to provide custom functionality
-  void doWalkModule(Module *module) {
+  void doWalkModule(Module* module) {
     // Dispatch statically through the SubType.
     SubType* self = static_cast<SubType*>(this);
     for (auto& curr : module->functionTypes) {
@@ -203,13 +224,13 @@ struct Walker : public VisitorType {
       self->visitExport(curr.get());
     }
     for (auto& curr : module->globals) {
-      self->visitGlobal(curr.get());
+      self->walkGlobal(curr.get());
     }
     for (auto& curr : module->functions) {
       self->walkFunction(curr.get());
     }
-    self->visitTable(&module->table);
-    self->visitMemory(&module->memory);
+    self->walkTable(&module->table);
+    self->walkMemory(&module->memory);
   }
 
   // Walk implementation. We don't use recursion as ASTs may be highly
@@ -281,16 +302,16 @@ struct Walker : public VisitorType {
   static void doVisitNop(SubType* self, Expression** currp)          { self->visitNop((*currp)->cast<Nop>()); }
   static void doVisitUnreachable(SubType* self, Expression** currp)  { self->visitUnreachable((*currp)->cast<Unreachable>()); }
 
-  void setModule(Module *module) {
+  void setModule(Module* module) {
     currModule = module;
   }
 
-  void setFunction(Function *func) {
+  void setFunction(Function* func) {
     currFunction = func;
   }
 
 private:
-  Expression *replace = nullptr; // a node to replace
+  Expression* replace = nullptr; // a node to replace
   std::vector<Task> stack; // stack of tasks
   Function* currFunction = nullptr; // current function being processed
   Module* currModule = nullptr; // current module being processed
@@ -299,7 +320,7 @@ private:
 // Walks in post-order, i.e., children first. When there isn't an obvious
 // order to operands, we follow them in order of execution.
 
-template<typename SubType, typename VisitorType>
+template<typename SubType, typename VisitorType = Visitor<SubType>>
 struct PostWalker : public Walker<SubType, VisitorType> {
 
   static void scan(SubType* self, Expression** currp) {
@@ -448,7 +469,7 @@ struct PostWalker : public Walker<SubType, VisitorType> {
 
 // Traversal with a control-flow stack.
 
-template<typename SubType, typename VisitorType>
+template<typename SubType, typename VisitorType = Visitor<SubType>>
 struct ControlFlowWalker : public PostWalker<SubType, VisitorType> {
   ControlFlowWalker() {}
 
@@ -511,7 +532,7 @@ struct ControlFlowWalker : public PostWalker<SubType, VisitorType> {
 
 // Traversal with an expression stack.
 
-template<typename SubType, typename VisitorType>
+template<typename SubType, typename VisitorType = Visitor<SubType>>
 struct ExpressionStackWalker : public PostWalker<SubType, VisitorType> {
   ExpressionStackWalker() {}
 
@@ -562,7 +583,7 @@ struct ExpressionStackWalker : public PostWalker<SubType, VisitorType> {
 // When execution is no longer linear, this notifies via a call
 // to noteNonLinear().
 
-template<typename SubType, typename VisitorType>
+template<typename SubType, typename VisitorType = Visitor<SubType>>
 struct LinearExecutionWalker : public PostWalker<SubType, VisitorType> {
   LinearExecutionWalker() {}
 

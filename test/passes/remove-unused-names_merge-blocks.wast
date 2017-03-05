@@ -869,4 +869,49 @@
       (nop)
     )
   )
+  (func $do-reorder (param $x i32)
+    (local $y i32)
+    (if (i32.const 1)
+      (block
+        (set_local $x
+          (i32.le_u
+            (get_local $x)
+            (block i32
+              (set_local $y (i32.const 5))
+              (i32.const 10)
+            )
+          )
+        )
+      )
+    )
+  )
+  (func $do-not-reorder (param $x i32)
+    (local $y i32)
+    (if (i32.const 1)
+      (block
+        (set_local $x
+          (i32.le_u
+            (get_local $y)
+            (block i32
+              (set_local $y (i32.const 5))
+              (i32.const 10)
+            )
+          )
+        )
+      )
+    )
+  )
+  (func $return-different-type (result i32)
+    (drop
+      (f64.abs
+        (return
+          (block i32 ;; when we flip the block out, it should have an ok type for the (dead) f64 op
+            (drop (i32.const 2))
+            (i32.const 1)
+          )
+        )
+      )
+    )
+    (unreachable)
+  )
 )

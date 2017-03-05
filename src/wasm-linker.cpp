@@ -40,19 +40,32 @@ void Linker::placeStackPointer(Address stackAllocation) {
     // stack pointer to point to one past-the-end of the stack allocation.
     std::vector<char> raw;
     raw.resize(pointerSize);
-    out.addRelocation(LinkerObject::Relocation::kData, (uint32_t*)&raw[0], ".stack", stackAllocation);
+    auto relocation = new LinkerObject::Relocation(
+      LinkerObject::Relocation::kData, (uint32_t*)&raw[0], ".stack", stackAllocation);
+    out.addRelocation(relocation);
     assert(out.wasm.memory.segments.empty());
     out.addSegment("__stack_pointer", raw);
   }
 }
 
-void Linker::ensureImport(Name target, std::string signature) {
+void Linker::ensureFunctionImport(Name target, std::string signature) {
   if (!out.wasm.checkImport(target)) {
     auto import = new Import;
     import->name = import->base = target;
     import->module = ENV;
-    import->functionType = ensureFunctionType(signature, &out.wasm);
+    import->functionType = ensureFunctionType(signature, &out.wasm)->name;
     import->kind = ExternalKind::Function;
+    out.wasm.addImport(import);
+  }
+}
+
+void Linker::ensureObjectImport(Name target) {
+  if (!out.wasm.checkImport(target)) {
+    auto import = new Import;
+    import->name = import->base = target;
+    import->module = ENV;
+    import->kind = ExternalKind::Global;
+    import->globalType = i32;
     out.wasm.addImport(import);
   }
 }
@@ -63,17 +76,18 @@ void Linker::layout() {
     Name target = f.first;
     if (!out.symbolInfo.undefinedFunctions.count(target)) continue;
     // Create an import for the target if necessary.
-    ensureImport(target, getSig(*f.second.begin()));
+    ensureFunctionImport(target, getSig(*f.second.begin()));
     // Change each call. The target is the same since it's still the name.
     // Delete and re-allocate the Expression as CallImport to avoid undefined
     // behavior.
     for (auto* call : f.second) {
       auto type = call->type;
-      auto operands = std::move(call->operands);
+      ExpressionList operands(out.wasm.allocator);
+      operands.swap(call->operands);
       auto target = call->target;
       CallImport* newCall = ExpressionManipulator::convert<Call, CallImport>(call, out.wasm.allocator);
       newCall->type = type;
-      newCall->operands = std::move(operands);
+      newCall->operands.swap(operands);
       newCall->target = target;
     }
   }
@@ -125,6 +139,11 @@ void Linker::layout() {
     memoryExport->value = Name::fromInt(0);
     memoryExport->kind = ExternalKind::Memory;
     out.wasm.addExport(memoryExport.release());
+  }
+
+  // Add imports for any imported objects
+  for (const auto& obj : out.symbolInfo.importedObjects) {
+    ensureObjectImport(obj);
   }
 
   // XXX For now, export all functions marked .globl.
@@ -236,20 +255,16 @@ void Linker::layout() {
     }
   }
 
-  // Export malloc, realloc, and free whenever availble. JavsScript version of
+  // Export malloc/realloc/free/memalign whenever availble. JavsScript version of
   // malloc has some issues and it cannot be called once _sbrk() is called, and
   // JS glue code does not have realloc().  TODO This should get the list of
   // exported functions from emcc.py - it has EXPORTED_FUNCTION metadata to keep
   // track of this. Get the list of exported functions using a command-line
   // argument from emcc.py and export all of them.
-  if (out.symbolInfo.implementedFunctions.count("malloc")) {
-    exportFunction("malloc", true);
-  }
-  if (out.symbolInfo.implementedFunctions.count("free")) {
-    exportFunction("free", true);
-  }
-  if (out.symbolInfo.implementedFunctions.count("realloc")) {
-    exportFunction("realloc", true);
+  for (auto function : {"malloc", "free", "realloc", "memalign"}) {
+    if (out.symbolInfo.implementedFunctions.count(function)) {
+      exportFunction(function, true);
+    }
   }
 
   // finalize function table
@@ -384,7 +399,7 @@ void Linker::makeDummyFunction() {
 Function* Linker::getImportThunk(Name name, const FunctionType* funcType) {
   Name thunkName = std::string("__importThunk_") + name.c_str();
   if (Function* thunk = out.wasm.checkFunction(thunkName)) return thunk;
-  ensureImport(name, getSig(funcType));
+  ensureFunctionImport(name, getSig(funcType));
   wasm::Builder wasmBuilder(out.wasm);
   std::vector<NameType> params;
   Index p = 0;

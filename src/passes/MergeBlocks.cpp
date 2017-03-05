@@ -70,7 +70,7 @@ namespace wasm {
 
 // Looks for reasons we can't remove the values from breaks to an origin
 // For example, if there is a switch targeting us, we can't do it - we can't remove the value from other targets
-struct ProblemFinder : public ControlFlowWalker<ProblemFinder, Visitor<ProblemFinder>> {
+struct ProblemFinder : public ControlFlowWalker<ProblemFinder> {
   Name origin;
   bool foundSwitch = false;
   // count br_ifs, and dropped br_ifs. if they don't match, then a br_if flow value is used, and we can't drop it
@@ -112,7 +112,7 @@ struct ProblemFinder : public ControlFlowWalker<ProblemFinder, Visitor<ProblemFi
 
 // Drops values from breaks to an origin.
 // While doing so it can create new blocks, so optimize blocks as well.
-struct BreakValueDropper : public ControlFlowWalker<BreakValueDropper, Visitor<BreakValueDropper>> {
+struct BreakValueDropper : public ControlFlowWalker<BreakValueDropper> {
   Name origin;
 
   void visitBlock(Block* curr);
@@ -190,7 +190,7 @@ static void optimizeBlock(Block* curr, Module* module) {
       for (size_t j = i + 1; j < curr->list.size(); j++) {
         merged.push_back(curr->list[j]);
       }
-      curr->list = merged;
+      curr->list.swap(merged);
       more = true;
       changed = true;
       break;
@@ -203,7 +203,7 @@ void BreakValueDropper::visitBlock(Block* curr) {
   optimizeBlock(curr, getModule());
 }
 
-struct MergeBlocks : public WalkerPass<PostWalker<MergeBlocks, Visitor<MergeBlocks>>> {
+struct MergeBlocks : public WalkerPass<PostWalker<MergeBlocks>> {
   bool isFunctionParallel() override { return true; }
 
   Pass* create() override { return new MergeBlocks; }
@@ -214,8 +214,12 @@ struct MergeBlocks : public WalkerPass<PostWalker<MergeBlocks, Visitor<MergeBloc
 
   Block* optimize(Expression* curr, Expression*& child, Block* outer = nullptr, Expression** dependency1 = nullptr, Expression** dependency2 = nullptr) {
     if (!child) return outer;
-    if (dependency1 && *dependency1 && EffectAnalyzer(*dependency1).hasSideEffects()) return outer;
-    if (dependency2 && *dependency2 && EffectAnalyzer(*dependency2).hasSideEffects()) return outer;
+    if ((dependency1 && *dependency1) || (dependency2 && *dependency2)) {
+      // there are dependencies, things we must be reordered through. make sure no problems there
+      EffectAnalyzer childEffects(getPassOptions(), child);
+      if (dependency1 && *dependency1 && EffectAnalyzer(getPassOptions(), *dependency1).invalidates(childEffects)) return outer;
+      if (dependency2 && *dependency2 && EffectAnalyzer(getPassOptions(), *dependency2).invalidates(childEffects)) return outer;
+    }
     if (auto* block = child->dynCast<Block>()) {
       if (!block->name.is() && block->list.size() >= 2) {
         child = block->list.back();
@@ -274,7 +278,7 @@ struct MergeBlocks : public WalkerPass<PostWalker<MergeBlocks, Visitor<MergeBloc
   void handleCall(T* curr, Block* outer = nullptr) {
     for (Index i = 0; i < curr->operands.size(); i++) {
       outer = optimize(curr, curr->operands[i], outer);
-      if (EffectAnalyzer(curr->operands[i]).hasSideEffects()) return;
+      if (EffectAnalyzer(getPassOptions(), curr->operands[i]).hasSideEffects()) return;
     }
   }
 
@@ -288,7 +292,7 @@ struct MergeBlocks : public WalkerPass<PostWalker<MergeBlocks, Visitor<MergeBloc
 
   void visitCallIndirect(CallIndirect* curr) {
     auto* outer = optimize(curr, curr->target);
-    if (EffectAnalyzer(curr->target).hasSideEffects()) return;
+    if (EffectAnalyzer(getPassOptions(), curr->target).hasSideEffects()) return;
     handleCall(curr, outer);
   }
 };

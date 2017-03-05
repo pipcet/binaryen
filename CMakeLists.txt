@@ -60,11 +60,29 @@ IF(MSVC)
     ADD_COMPILE_FLAG("/arch:sse2")
   ENDIF()
   ADD_COMPILE_FLAG("/wd4146") # Ignore warning "warning C4146: unary minus operator applied to unsigned type, result still unsigned", this pattern is used somewhat commonly in the code.
+  # 4267 and 4244 are conversion/truncation warnings. We might want to fix these but they are currently pervasive.
+  ADD_COMPILE_FLAG("/wd4267")
+  ADD_COMPILE_FLAG("/wd4244")
   ADD_COMPILE_FLAG("/WX-")
-  ADD_DEBUG_COMPILE_FLAG("/O0")
+  ADD_DEBUG_COMPILE_FLAG("/Od")
   ADD_NONDEBUG_COMPILE_FLAG("/O2")
-  ADD_COMPILE_FLAG("-D_CRT_SECURE_NO_WARNINGS")
-  ADD_COMPILE_FLAG("-D_SCL_SECURE_NO_WARNINGS")
+  ADD_COMPILE_FLAG("/D_CRT_SECURE_NO_WARNINGS")
+  ADD_COMPILE_FLAG("/D_SCL_SECURE_NO_WARNINGS")
+
+  ADD_NONDEBUG_COMPILE_FLAG("/UNDEBUG") # Keep asserts.
+  # Also remove /D NDEBUG to avoid MSVC warnings about conflicting defines.
+  if( NOT CMAKE_BUILD_TYPE MATCHES "Debug" )
+    foreach (flags_var_to_scrub
+        CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS_RELWITHDEBINFO
+        CMAKE_CXX_FLAGS_MINSIZEREL
+        CMAKE_C_FLAGS_RELEASE
+        CMAKE_C_FLAGS_RELWITHDEBINFO
+        CMAKE_C_FLAGS_MINSIZEREL)
+      string (REGEX REPLACE "(^| )[/-]D *NDEBUG($| )" " "
+        "${flags_var_to_scrub}" "${${flags_var_to_scrub}}")
+    endforeach()
+  endif()
 
   IF(RUN_STATIC_ANALYZER)
     ADD_DEFINITIONS(/analyze)
@@ -100,6 +118,7 @@ IF (UNIX AND
 ENDIF()
 
 # Static libraries
+ADD_SUBDIRECTORY(src/ast)
 ADD_SUBDIRECTORY(src/asmjs)
 ADD_SUBDIRECTORY(src/emscripten-optimizer)
 ADD_SUBDIRECTORY(src/passes)
@@ -118,7 +137,7 @@ IF(BUILD_STATIC_LIB)
 ELSE()
   ADD_LIBRARY(binaryen SHARED ${binaryen_SOURCES})
 ENDIF()
-TARGET_LINK_LIBRARIES(binaryen ${all_passes} wasm asmjs support)
+TARGET_LINK_LIBRARIES(binaryen ${all_passes} wasm asmjs ast support)
 INSTALL(TARGETS binaryen DESTINATION lib)
 
 INSTALL(FILES src/binaryen-c.h DESTINATION include)
@@ -132,7 +151,7 @@ SET(wasm-shell_SOURCES
 )
 ADD_EXECUTABLE(wasm-shell
                ${wasm-shell_SOURCES})
-TARGET_LINK_LIBRARIES(wasm-shell wasm asmjs emscripten-optimizer ${all_passes} support)
+TARGET_LINK_LIBRARIES(wasm-shell wasm asmjs emscripten-optimizer ${all_passes} ast support)
 SET_PROPERTY(TARGET wasm-shell PROPERTY CXX_STANDARD 11)
 SET_PROPERTY(TARGET wasm-shell PROPERTY CXX_STANDARD_REQUIRED ON)
 INSTALL(TARGETS wasm-shell DESTINATION bin)
@@ -142,7 +161,7 @@ SET(wasm-opt_SOURCES
 )
 ADD_EXECUTABLE(wasm-opt
                ${wasm-opt_SOURCES})
-TARGET_LINK_LIBRARIES(wasm-opt wasm asmjs emscripten-optimizer ${all_passes} support)
+TARGET_LINK_LIBRARIES(wasm-opt wasm asmjs emscripten-optimizer ${all_passes} ast support)
 SET_PROPERTY(TARGET wasm-opt PROPERTY CXX_STANDARD 11)
 SET_PROPERTY(TARGET wasm-opt PROPERTY CXX_STANDARD_REQUIRED ON)
 INSTALL(TARGETS wasm-opt DESTINATION bin)
@@ -153,7 +172,7 @@ SET(asm2wasm_SOURCES
 )
 ADD_EXECUTABLE(asm2wasm
                ${asm2wasm_SOURCES})
-TARGET_LINK_LIBRARIES(asm2wasm emscripten-optimizer ${all_passes} wasm asmjs support)
+TARGET_LINK_LIBRARIES(asm2wasm emscripten-optimizer ${all_passes} wasm asmjs ast support)
 SET_PROPERTY(TARGET asm2wasm PROPERTY CXX_STANDARD 11)
 SET_PROPERTY(TARGET asm2wasm PROPERTY CXX_STANDARD_REQUIRED ON)
 INSTALL(TARGETS asm2wasm DESTINATION bin)
@@ -165,7 +184,7 @@ SET(s2wasm_SOURCES
 )
 ADD_EXECUTABLE(s2wasm
                ${s2wasm_SOURCES})
-TARGET_LINK_LIBRARIES(s2wasm passes wasm asmjs support)
+TARGET_LINK_LIBRARIES(s2wasm passes wasm asmjs ast support)
 SET_PROPERTY(TARGET s2wasm PROPERTY CXX_STANDARD 11)
 SET_PROPERTY(TARGET s2wasm PROPERTY CXX_STANDARD_REQUIRED ON)
 INSTALL(TARGETS s2wasm DESTINATION bin)
@@ -175,7 +194,7 @@ SET(wasm_as_SOURCES
 )
 ADD_EXECUTABLE(wasm-as
                ${wasm_as_SOURCES})
-TARGET_LINK_LIBRARIES(wasm-as wasm asmjs passes support)
+TARGET_LINK_LIBRARIES(wasm-as wasm asmjs passes ast support)
 SET_PROPERTY(TARGET wasm-as PROPERTY CXX_STANDARD 11)
 SET_PROPERTY(TARGET wasm-as PROPERTY CXX_STANDARD_REQUIRED ON)
 INSTALL(TARGETS wasm-as DESTINATION bin)
@@ -185,7 +204,7 @@ SET(wasm_dis_SOURCES
 )
 ADD_EXECUTABLE(wasm-dis
                ${wasm_dis_SOURCES})
-TARGET_LINK_LIBRARIES(wasm-dis passes wasm asmjs support)
+TARGET_LINK_LIBRARIES(wasm-dis passes wasm asmjs ast support)
 SET_PROPERTY(TARGET wasm-dis PROPERTY CXX_STANDARD 11)
 SET_PROPERTY(TARGET wasm-dis PROPERTY CXX_STANDARD_REQUIRED ON)
 INSTALL(TARGETS wasm-dis DESTINATION bin)

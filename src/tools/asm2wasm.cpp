@@ -23,6 +23,7 @@
 #include "support/file.h"
 #include "wasm-builder.h"
 #include "wasm-printing.h"
+#include "wasm-io.h"
 
 #include "asm2wasm.h"
 
@@ -34,6 +35,9 @@ int main(int argc, const char *argv[]) {
   bool runOptimizationPasses = false;
   bool imprecise = false;
   bool wasmOnly = false;
+  bool debugInfo = false;
+  std::string symbolMap;
+  bool emitBinary = true;
 
   Options options("asm2wasm", "Translate asm.js files to .wast files");
   options
@@ -55,13 +59,17 @@ int main(int argc, const char *argv[]) {
            [](Options *o, const std::string &argument) {
              o->extra["mem base"] = argument;
            })
-      .add("--mem-max", "-mm", "Set the maximum size of memory in the wasm module (in bytes). Without this, TOTAL_MEMORY is used (as it is used for the initial value), or if memory growth is enabled, no limit is set. This overrides both of those.", Options::Arguments::One,
+      .add("--mem-max", "-mm", "Set the maximum size of memory in the wasm module (in bytes). -1 means no limit. Without this, TOTAL_MEMORY is used (as it is used for the initial value), or if memory growth is enabled, no limit is set. This overrides both of those.", Options::Arguments::One,
            [](Options *o, const std::string &argument) {
              o->extra["mem max"] = argument;
            })
       .add("--total-memory", "-m", "Total memory size", Options::Arguments::One,
            [](Options *o, const std::string &argument) {
              o->extra["total memory"] = argument;
+           })
+      .add("--table-max", "-tM", "Set the maximum size of the table. Without this, it is set depending on how many functions are in the module. -1 means no limit", Options::Arguments::One,
+           [](Options *o, const std::string &argument) {
+             o->extra["table max"] = argument;
            })
       #include "optimization-options.h"
       .add("--no-opts", "-n", "Disable optimization passes (deprecated)", Options::Arguments::Zero,
@@ -76,11 +84,26 @@ int main(int argc, const char *argv[]) {
            [&wasmOnly](Options *o, const std::string &) {
              wasmOnly = true;
            })
+      .add("--debuginfo", "-g", "Emit names section and debug info (for debug info you must emit text, -S, for this to work)",
+           Options::Arguments::Zero,
+           [&](Options *o, const std::string &arguments) { debugInfo = true; })
+      .add("--symbolmap", "-s", "Emit a symbol map (indexes => names)",
+           Options::Arguments::One,
+           [&](Options *o, const std::string &argument) { symbolMap = argument; })
+      .add("--emit-text", "-S", "Emit text instead of binary for the output file",
+           Options::Arguments::Zero,
+           [&](Options *o, const std::string &argument) { emitBinary = false; })
       .add_positional("INFILE", Options::Arguments::One,
                       [](Options *o, const std::string &argument) {
                         o->extra["infile"] = argument;
                       });
   options.parse(argc, argv);
+
+  // finalize arguments
+  if (options.extra["output"].size() == 0) {
+    // when no output file is specified, we emit text to stdout
+    emitBinary = false;
+  }
 
   const auto &tm_it = options.extra.find("total memory");
   size_t totalMemory =
@@ -92,6 +115,8 @@ int main(int argc, const char *argv[]) {
   }
 
   Asm2WasmPreProcessor pre;
+  // wasm binaries can contain a names section, but not full debug info
+  pre.debugInfo = debugInfo && !emitBinary;
   auto input(
       read_file<std::vector<char>>(options.extra["infile"], Flags::Text, options.debug ? Flags::Debug : Flags::Release));
   char *start = pre.process(input.data());
@@ -103,7 +128,7 @@ int main(int argc, const char *argv[]) {
   if (options.debug) std::cerr << "wasming..." << std::endl;
   Module wasm;
   wasm.memory.initial = wasm.memory.max = totalMemory / Memory::kPageSize;
-  Asm2WasmBuilder asm2wasm(wasm, pre.memoryGrowth, options.debug, imprecise, passOptions, runOptimizationPasses, wasmOnly);
+  Asm2WasmBuilder asm2wasm(wasm, pre, options.debug, imprecise, passOptions, runOptimizationPasses, wasmOnly);
   asm2wasm.processAsm(asmjs);
 
   // import mem init file, if provided
@@ -130,12 +155,31 @@ int main(int argc, const char *argv[]) {
   // Set the max memory size, if requested
   const auto &memMax = options.extra.find("mem max");
   if (memMax != options.extra.end()) {
-    wasm.memory.max = atoi(memMax->second.c_str()) / Memory::kPageSize;
+    int max = atoi(memMax->second.c_str());
+    if (max >= 0) {
+      wasm.memory.max = max / Memory::kPageSize;
+    } else {
+      wasm.memory.max = Memory::kMaxSize;
+    }
+  }
+  // Set the table sizes, if requested
+  const auto &tableMax = options.extra.find("table max");
+  if (tableMax != options.extra.end()) {
+    int max = atoi(tableMax->second.c_str());
+    if (max >= 0) {
+      wasm.table.max = max;
+    } else {
+      wasm.table.max = Table::kMaxSize;
+    }
   }
 
   if (options.debug) std::cerr << "printing..." << std::endl;
-  Output output(options.extra["output"], Flags::Text, options.debug ? Flags::Debug : Flags::Release);
-  WasmPrinter::printModule(&wasm, output.getStream());
+  ModuleWriter writer;
+  writer.setDebug(options.debug);
+  writer.setDebugInfo(debugInfo);
+  writer.setSymbolMap(symbolMap);
+  writer.setBinary(emitBinary);
+  writer.write(wasm, options.extra["output"]);
 
   if (options.debug) std::cerr << "done." << std::endl;
 }

@@ -77,6 +77,7 @@ void PassRegistry::registerPasses() {
   registerPass("nm", "name list", createNameListPass);
   registerPass("name-manager", "utility pass to manage names in modules", createNameManagerPass);
   registerPass("optimize-instructions", "optimizes instruction combinations", createOptimizeInstructionsPass);
+  registerPass("pick-load-signs", "pick load signs based on their uses", createPickLoadSignsPass);
   registerPass("post-emscripten", "miscellaneous optimizations for Emscripten-generated code", createPostEmscriptenPass);
   registerPass("print", "print in s-expression format", createPrinterPass);
   registerPass("print-minified", "print in minified s-expression format", createMinifiedPrinterPass);
@@ -86,7 +87,7 @@ void PassRegistry::registerPasses() {
   registerPass("remove-imports", "removes imports and replaces them with nops", createRemoveImportsPass);
   registerPass("remove-memory", "removes memory segments", createRemoveMemoryPass);
   registerPass("remove-unused-brs", "removes breaks from locations that are not needed", createRemoveUnusedBrsPass);
-  registerPass("remove-unused-functions", "removes unused functions", createRemoveUnusedFunctionsPass);
+  registerPass("remove-unused-module-elements", "removes unused module elements", createRemoveUnusedModuleElementsPass);
   registerPass("remove-unused-names", "removes names from locations that are never branched to", createRemoveUnusedNamesPass);
   registerPass("reorder-functions", "sorts functions by access frequency", createReorderFunctionsPass);
   registerPass("reorder-locals", "sorts locals by access frequency", createReorderLocalsPass);
@@ -103,7 +104,7 @@ void PassRunner::addDefaultOptimizationPasses() {
   add("duplicate-function-elimination");
   addDefaultFunctionOptimizationPasses();
   add("duplicate-function-elimination"); // optimizations show more functions as duplicate
-  add("remove-unused-functions");
+  add("remove-unused-module-elements");
   add("memory-packing");
 }
 
@@ -112,6 +113,9 @@ void PassRunner::addDefaultFunctionOptimizationPasses() {
   add("remove-unused-brs");
   add("remove-unused-names");
   add("optimize-instructions");
+  if (options.optimizeLevel >= 2 || options.shrinkLevel >= 2) {
+    add("pick-load-signs");
+  }
   add("precompute");
   if (options.optimizeLevel >= 2 || options.shrinkLevel >= 2) {
     add("code-pushing");
@@ -133,12 +137,17 @@ void PassRunner::addDefaultFunctionOptimizationPasses() {
 
 void PassRunner::addDefaultGlobalOptimizationPasses() {
   add("duplicate-function-elimination");
-  add("remove-unused-functions");
+  add("remove-unused-module-elements");
   add("memory-packing");
 }
 
 void PassRunner::run() {
-  if (options.debug) {
+  // BINARYEN_PASS_DEBUG is a convenient commandline way to log out the toplevel passes, their times,
+  //                     and validate between each pass.
+  //                     (we don't recurse pass debug into sub-passes, as it doesn't help anyhow and
+  //                     also is bad for e.g. printing which is a pass)
+  static const int passDebug = getenv("BINARYEN_PASS_DEBUG") ? atoi(getenv("BINARYEN_PASS_DEBUG")) : 0;
+  if (!isNested && (options.debug || passDebug)) {
     // for debug logging purposes, run each pass in full before running the other
     auto totalTime = std::chrono::duration<double>(0);
     size_t padding = 0;
@@ -146,11 +155,10 @@ void PassRunner::run() {
     for (auto pass : passes) {
       padding = std::max(padding, pass->name.size());
     }
-    bool passDebug = getenv("BINARYEN_PASS_DEBUG") && getenv("BINARYEN_PASS_DEBUG")[0] != '0';
     for (auto* pass : passes) {
       // ignoring the time, save a printout of the module before, in case this pass breaks it, so we can print the before and after
       std::stringstream moduleBefore;
-      if (passDebug) {
+      if (passDebug == 2) {
         WasmPrinter::printModule(wasm, moduleBefore);
       }
       // prepare to run
@@ -174,10 +182,10 @@ void PassRunner::run() {
       // validate, ignoring the time
       std::cerr << "[PassRunner]   (validating)\n";
       if (!WasmValidator().validate(*wasm, false, options.validateGlobally)) {
-        if (passDebug) {
+        if (passDebug >= 2) {
           std::cerr << "Last pass (" << pass->name << ") broke validation. Here is the module before: \n" << moduleBefore.str() << "\n";
         } else {
-          std::cerr << "Last pass (" << pass->name << ") broke validation. Run with BINARYEN_PASS_DEBUG=1 in the env to see the earlier state\n";
+          std::cerr << "Last pass (" << pass->name << ") broke validation. Run with BINARYEN_PASS_DEBUG=2 in the env to see the earlier state (FIXME: this is broken, need to prevent recursion of the print pass\n";
         }
         abort();
       }

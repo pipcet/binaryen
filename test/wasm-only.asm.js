@@ -21,6 +21,9 @@ function asm(global, env, buffer) {
   var illegalImport = env.illegalImport;
   var illegalImportResult = env.illegalImportResult;
 
+  var _fabsf = env._fabsf;
+  var do_i64 = env.do_i64;
+
   function loads() {
     var i = 0, f = fround(0), d = +0;
     i = load1(100);
@@ -223,6 +226,64 @@ function asm(global, env, buffer) {
     }
     return $waka | 0;
   }
+  function unreachable_leftovers($0,$1,$2) {
+   $0 = $0|0;
+   $1 = $1|0;
+   $2 = $2|0;
+   var label = 0;
+   L1: do {
+    if ($1) {
+     label = 10;
+    } else {
+     if ($2) {
+      break L1;
+      return;
+     }
+     store4($0,-2);
+     return;
+    }
+   } while(0);
+   if ((label|0) == 10) {
+    store4($0,-1);
+   }
+   return;
+  }
+  function switch64TOOMUCH($a444) {
+    $a444 = i64($a444);
+    var $waka = 0;
+    switch (i64($a444)) {
+     case i64_const(0,1073741824): // spread is huge here, we should not make a jump table!
+     case i64_const(0,2147483648):  {
+      return 40;
+     }
+     default: {
+      $waka = 1;
+     }
+    }
+    switch (100) {
+     case 107374182: // similar, but 32-bit
+     case 214748364:  {
+      return 41;
+     }
+     default: {
+      $waka = 1001;
+     }
+    }
+    // no defaults
+    switch (i64($a444)) {
+     case i64_const(0,1073741824): // spread is huge here, we should not make a jump table!
+     case i64_const(0,2147483648):  {
+      return 42;
+     }
+    }
+    switch (100) {
+     case 107374182: // similar, but 32-bit
+     case 214748364:  {
+      return 43;
+     }
+    }
+    return 44;
+  }
   function keepAlive() {
     loads();
     stores();
@@ -235,7 +296,15 @@ function asm(global, env, buffer) {
     i64(ifValue64(i64(0), i64(0)));
     ifValue32(0, 0) | 0;
     switch64(i64(0)) | 0;
+    unreachable_leftovers(0, 0, 0);
   }
+
+  function __emscripten_dceable_type_decls() { // dce-able, but this defines the type of fabsf which has no other use
+    fround(_fabsf(fround(0.0)));
+    i64(do_i64());
+  }
+
+  var FUNCTION_TABLE_X = [illegalImport, _fabsf, do_i64]; // must stay ok in the table, not legalized, as it will be called internally by the true type
 
   return { test64: test64, illegalParam : illegalParam, illegalResult: illegalResult, keepAlive: keepAlive };
 }

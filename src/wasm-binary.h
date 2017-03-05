@@ -270,7 +270,7 @@ namespace BinaryConsts {
 
 enum Meta {
   Magic = 0x6d736100,
-  Version = 0x0d
+  Version = 0x01
 };
 
 enum Section {
@@ -638,7 +638,7 @@ public:
   WasmBinaryBuilder(Module& wasm, std::vector<char>& input, bool debug) : wasm(wasm), allocator(wasm.allocator), input(input), debug(debug) {}
 
   void read();
-  bool readUserSection();
+  void readUserSection(size_t payloadLen);
   bool more() { return pos < input.size();}
 
   uint8_t getInt8();
@@ -690,13 +690,19 @@ public:
   void readFunctions();
 
   std::map<Export*, Index> exportIndexes;
+  std::vector<Export*> exportOrder;
   void readExports();
 
   Expression* readExpression();
   void readGlobals();
 
-  struct BreakTarget { Name name; int arity;};
+  struct BreakTarget {
+    Name name;
+    int arity;
+    BreakTarget(Name name, int arity) : name(name), arity(arity) {}
+  };
   std::vector<BreakTarget> breakStack;
+  bool breaksToReturn; // whether a break is done to the function scope, which is in effect a return
 
   std::vector<Expression*> expressionStack;
 
@@ -704,6 +710,7 @@ public:
 
   void processExpressions();
   Expression* popExpression();
+  Expression* popNonVoidExpression();
 
   std::map<Index, Name> mappedGlobals; // index of the Global => name. first imported globals, then internal globals
 
@@ -736,7 +743,7 @@ public:
     auto num = type->params.size();
     call->operands.resize(num);
     for (size_t i = 0; i < num; i++) {
-      call->operands[num - i - 1] = popExpression();
+      call->operands[num - i - 1] = popNonVoidExpression();
     }
     call->type = type->result;
   }

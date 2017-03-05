@@ -29,7 +29,7 @@ static Name LABEL("label");
 
 // We need to use new label names, which we cannot create in parallel, so pre-create them
 
-const Index MAX_NAME_INDEX = 1000;
+const Index MAX_NAME_INDEX = 10000;
 
 std::vector<Name>* innerNames = nullptr;
 std::vector<Name>* outerNames = nullptr;
@@ -41,8 +41,8 @@ struct NameEnsurer {
     innerNames = new std::vector<Name>;
     outerNames = new std::vector<Name>;
     for (Index i = 0; i < MAX_NAME_INDEX; i++) {
-      innerNames->push_back(Name(std::string("jumpthreading$inner$") + std::to_string(i)));
-      outerNames->push_back(Name(std::string("jumpthreading$outer$") + std::to_string(i)));
+      innerNames->push_back(Name(std::string("__rjti$") + std::to_string(i)));
+      outerNames->push_back(Name(std::string("__rjto$") + std::to_string(i)));
     }
   }
 };
@@ -74,7 +74,7 @@ static Index getSetLabelValue(SetLocal* set) {
   return set->value->cast<Const>()->value.geti32();
 }
 
-struct LabelUseFinder : public PostWalker<LabelUseFinder, Visitor<LabelUseFinder>> {
+struct LabelUseFinder : public PostWalker<LabelUseFinder> {
   Index labelIndex;
   std::map<Index, Index>& checks; // label value => number of checks on it
   std::map<Index, Index>& sets;   // label value => number of sets to it
@@ -94,7 +94,7 @@ struct LabelUseFinder : public PostWalker<LabelUseFinder, Visitor<LabelUseFinder
   }
 };
 
-struct RelooperJumpThreading : public WalkerPass<ExpressionStackWalker<RelooperJumpThreading, Visitor<RelooperJumpThreading>>> {
+struct RelooperJumpThreading : public WalkerPass<ExpressionStackWalker<RelooperJumpThreading>> {
   bool isFunctionParallel() override { return true; }
 
   Pass* create() override { return new RelooperJumpThreading; }
@@ -159,7 +159,7 @@ struct RelooperJumpThreading : public WalkerPass<ExpressionStackWalker<RelooperJ
       labelIndex = func->getLocalIndex(LABEL);
       LabelUseFinder finder(labelIndex, labelChecks, labelSets);
       finder.walk(func->body);
-      WalkerPass<ExpressionStackWalker<RelooperJumpThreading, Visitor<RelooperJumpThreading>>>::doWalkFunction(func);
+      WalkerPass<ExpressionStackWalker<RelooperJumpThreading>>::doWalkFunction(func);
     }
   }
 
@@ -221,7 +221,7 @@ private:
     auto outerName = outerNames->at(nameCounter);
     auto* ifFalse = iff->ifFalse;
     // all assignments of label to the target can be replaced with breaks to the target, via innerName
-    struct JumpUpdater : public PostWalker<JumpUpdater, Visitor<JumpUpdater>> {
+    struct JumpUpdater : public PostWalker<JumpUpdater> {
       Index labelIndex;
       Index targetNum;
       Name targetName;

@@ -59,6 +59,7 @@ extern "C" void EMSCRIPTEN_KEEPALIVE load_asm2wasm(char *input) {
   prepare2wasm();
 
   Asm2WasmPreProcessor pre;
+  pre.debugInfo = true; // FIXME: we must do this, as the input asm.js might have debug info
   input = pre.process(input);
 
   // proceed to parse and wasmify
@@ -79,7 +80,7 @@ extern "C" void EMSCRIPTEN_KEEPALIVE load_asm2wasm(char *input) {
   module->memory.max = pre.memoryGrowth ? Address(Memory::kMaxSize) : module->memory.initial;
 
   if (wasmJSDebug) std::cerr << "wasming...\n";
-  asm2wasm = new Asm2WasmBuilder(*module, pre.memoryGrowth, debug, false /* TODO: support imprecise? */, PassOptions(), false /* TODO: support optimizing? */, false /* TODO: support asm2wasm-i64? */);
+  asm2wasm = new Asm2WasmBuilder(*module, pre, debug, false /* TODO: support imprecise? */, PassOptions(), false /* TODO: support optimizing? */, false /* TODO: support asm2wasm-i64? */);
   asm2wasm->processAsm(asmjs);
 }
 
@@ -227,9 +228,18 @@ extern "C" void EMSCRIPTEN_KEEPALIVE instantiate() {
         Address offset = ConstantExpressionRunner(instance.globals).visit(segment.offset).value.geti32();
         assert(offset + segment.data.size() <= wasm.table.initial);
         for (size_t i = 0; i != segment.data.size(); ++i) {
-          EM_ASM_({
-            Module['outside']['wasmTable'][$0] = $1;
-          }, offset + i, wasm.getFunction(segment.data[i]));
+          Name name = segment.data[i];
+          auto* func = wasm.checkFunction(name);
+          if (func) {
+            EM_ASM_({
+              Module['outside']['wasmTable'][$0] = $1;
+            }, offset + i, func);
+          } else {
+            auto* import = wasm.getImport(name);
+            EM_ASM_({
+              Module['outside']['wasmTable'][$0] = Module['lookupImport'](Pointer_stringify($1), Pointer_stringify($2));
+            }, offset + i, import->module.str, import->base.str);
+          }
         }
       }
     }

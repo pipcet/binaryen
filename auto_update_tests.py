@@ -2,7 +2,7 @@
 
 import os, sys, subprocess, difflib
 
-from scripts.support import run_command, split_wast
+from scripts.test.support import run_command, split_wast
 
 print '[ processing and updating testcases... ]\n'
 
@@ -13,7 +13,7 @@ for asm in sorted(os.listdir('test')):
         cmd = [os.path.join('bin', 'asm2wasm'), os.path.join('test', asm)]
         wasm = asm.replace('.asm.js', '.fromasm')
         if not precise:
-          cmd += ['--imprecise']
+          cmd += ['--imprecise', '--ignore-implicit-traps']
           wasm += '.imprecise'
         if not opts:
           wasm += '.no-opts'
@@ -21,6 +21,8 @@ for asm in sorted(os.listdir('test')):
             cmd += ['-O0'] # test that -O0 does nothing
         else:
           cmd += ['-O']
+        if 'debugInfo' in asm:
+          cmd += ['-g']
         if precise and opts:
           # test mem init importing
           open('a.mem', 'wb').write(asm)
@@ -92,7 +94,7 @@ for t in sorted(os.listdir(os.path.join('test', 'passes'))):
 print '\n[ checking wasm-opt -o notation... ]\n'
 
 wast = os.path.join('test', 'hello_world.wast')
-cmd = [os.path.join('bin', 'wasm-opt'), wast, '-o', 'a.wast']
+cmd = [os.path.join('bin', 'wasm-opt'), wast, '-o', 'a.wast', '-S']
 run_command(cmd)
 open(wast, 'w').write(open('a.wast').read())
 
@@ -172,9 +174,21 @@ for t in os.listdir('test'):
   if t.endswith('.wast') and not t.startswith('spec'):
     print '..', t
     t = os.path.join('test', t)
+    f = t + '.from-wast'
     cmd = [os.path.join('bin', 'wasm-opt'), t, '--print']
     actual = run_command(cmd)
     actual = actual.replace('printing before:\n', '')
-    open(t, 'w').write(actual)
+    open(f, 'w').write(actual)
+
+print '\n[ checking wasm-dis on provided binaries... ]\n'
+
+for t in os.listdir('test'):
+  if t.endswith('.wasm') and not t.startswith('spec'):
+    print '..', t
+    t = os.path.join('test', t)
+    cmd = [os.path.join('bin', 'wasm-dis'), t]
+    actual = run_command(cmd)
+
+    open(t + '.fromBinary', 'w').write(actual)
 
 print '\n[ success! ]'

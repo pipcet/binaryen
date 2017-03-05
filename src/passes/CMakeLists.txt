@@ -13,6 +13,7 @@ SET(passes_SOURCES
   NameManager.cpp
   NameList.cpp
   OptimizeInstructions.cpp
+  PickLoadSigns.cpp
   PostEmscripten.cpp
   Precompute.cpp
   Print.cpp
@@ -22,7 +23,7 @@ SET(passes_SOURCES
   RemoveMemory.cpp
   RemoveUnusedBrs.cpp
   RemoveUnusedNames.cpp
-  RemoveUnusedFunctions.cpp
+  RemoveUnusedModuleElements.cpp
   ReorderLocals.cpp
   ReorderFunctions.cpp
   SimplifyLocals.cpp

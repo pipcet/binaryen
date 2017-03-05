@@ -45,6 +45,19 @@ struct PrintSExpression : public Visitor<PrintSExpression> {
     }
   }
 
+  void visit(Expression* curr) {
+    if (currFunction) {
+      // show an annotation, if there is one
+      auto& annotations = currFunction->annotations;
+      auto iter = annotations.find(curr);
+      if (iter != annotations.end()) {
+        o << ";; " << iter->second << '\n';
+        doIndent(o, indent);
+      }
+    }
+    Visitor<PrintSExpression>::visit(curr);
+  }
+
   void setMinify(bool minify_) {
     minify = minify_;
     maybeSpace = minify ? "" : " ";
@@ -545,7 +558,7 @@ struct PrintSExpression : public Visitor<PrintSExpression> {
     printText(o, curr->module.str) << ' ';
     printText(o, curr->base.str) << ' ';
     switch (curr->kind) {
-      case ExternalKind::Function: if (curr->functionType) visitFunctionType(curr->functionType, &curr->name); break;
+      case ExternalKind::Function: if (curr->functionType.is()) visitFunctionType(currModule->getFunctionType(curr->functionType), &curr->name); break;
       case ExternalKind::Table:    printTableHeader(&currModule->table); break;
       case ExternalKind::Memory:   printMemoryHeader(&currModule->memory); break;
       case ExternalKind::Global:   o << "(global " << curr->name << ' ' << printWasmType(curr->globalType) << ")"; break;
@@ -698,15 +711,15 @@ struct PrintSExpression : public Visitor<PrintSExpression> {
       visitImport(child.get());
       o << maybeNewLine;
     }
-    if (curr->table.exists) {
-      visitTable(&curr->table); // Prints its own newlines
-    }
-    visitMemory(&curr->memory);
     for (auto& child : curr->globals) {
       doIndent(o, indent);
       visitGlobal(child.get());
       o << maybeNewLine;
     }
+    if (curr->table.exists) {
+      visitTable(&curr->table); // Prints its own newlines
+    }
+    visitMemory(&curr->memory);
     for (auto& child : curr->exports) {
       doIndent(o, indent);
       visitExport(child.get());
@@ -720,6 +733,11 @@ struct PrintSExpression : public Visitor<PrintSExpression> {
     for (auto& child : curr->functions) {
       doIndent(o, indent);
       visitFunction(child.get());
+      o << maybeNewLine;
+    }
+    for (auto& section : curr->userSections) {
+      doIndent(o, indent);
+      o << ";; custom section \"" << section.name << "\", size " << section.data.size();
       o << maybeNewLine;
     }
     decIndent();

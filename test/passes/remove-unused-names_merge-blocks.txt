@@ -3,6 +3,7 @@
   (type $ii (func (param i32 i32)))
   (type $iii (func (param i32 i32 i32)))
   (type $3 (func))
+  (type $4 (func (result i32)))
   (table 1 1 anyfunc)
   (elem (i32.const 0) $call-i)
   (memory $0 256 256)
@@ -447,27 +448,33 @@
     (drop
       (i32.const 10)
     )
-    (unreachable)
-    (drop
-      (i32.const 50)
-    )
     (drop
       (select
         (i32.const 20)
-        (i32.const 40)
-        (i32.const 60)
+        (block i32
+          (unreachable)
+          (i32.const 40)
+        )
+        (block i32
+          (drop
+            (i32.const 50)
+          )
+          (i32.const 60)
+        )
       )
     )
     (drop
       (i32.const 10)
     )
     (drop
-      (i32.const 30)
-    )
-    (drop
       (select
         (i32.const 20)
-        (unreachable)
+        (block i32
+          (drop
+            (i32.const 30)
+          )
+          (unreachable)
+        )
         (block i32
           (drop
             (i32.const 50)
@@ -482,12 +489,14 @@
     (drop
       (i32.const 30)
     )
-    (unreachable)
     (drop
       (select
         (i32.const 20)
         (i32.const 40)
-        (i32.const 60)
+        (block i32
+          (unreachable)
+          (i32.const 60)
+        )
       )
     )
     (drop
@@ -497,13 +506,15 @@
       (i32.const 30)
     )
     (drop
-      (i32.const 50)
-    )
-    (drop
       (select
         (i32.const 20)
         (i32.const 40)
-        (unreachable)
+        (block i32
+          (drop
+            (i32.const 50)
+          )
+          (unreachable)
+        )
       )
     )
   )
@@ -692,5 +703,52 @@
       )
       (nop)
     )
+  )
+  (func $do-reorder (type $i) (param $x i32)
+    (local $y i32)
+    (if
+      (i32.const 1)
+      (block
+        (set_local $y
+          (i32.const 5)
+        )
+        (set_local $x
+          (i32.le_u
+            (get_local $x)
+            (i32.const 10)
+          )
+        )
+      )
+    )
+  )
+  (func $do-not-reorder (type $i) (param $x i32)
+    (local $y i32)
+    (if
+      (i32.const 1)
+      (set_local $x
+        (i32.le_u
+          (get_local $y)
+          (block i32
+            (set_local $y
+              (i32.const 5)
+            )
+            (i32.const 10)
+          )
+        )
+      )
+    )
+  )
+  (func $return-different-type (type $4) (result i32)
+    (drop
+      (i32.const 2)
+    )
+    (drop
+      (f64.abs
+        (return
+          (i32.const 1)
+        )
+      )
+    )
+    (unreachable)
   )
 )

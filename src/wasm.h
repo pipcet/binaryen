@@ -58,35 +58,10 @@
 #include "mixed_arena.h"
 #include "pretty_printing.h"
 #include "support/bits.h"
+#include "support/name.h"
 #include "support/utilities.h"
 
 namespace wasm {
-
-// We use a Name for all of the identifiers. These are IStrings, so they are
-// all interned - comparisons etc are just pointer comparisons, so there is no
-// perf loss. Having names everywhere makes using the AST much nicer (for
-// example, block names are strings and not offsets, which makes composition
-// - adding blocks, removing blocks - easy). One exception is local variables,
-// where we do use indices, as they are a large proportion of the AST,
-// perf matters a lot there, and compositionality is not a problem.
-// TODO: as an optimization, IString values < some threshold could be considered
-//       numerical indices directly.
-
-struct Name : public cashew::IString {
-  Name() : cashew::IString() {}
-  Name(const char *str) : cashew::IString(str, false) {}
-  Name(cashew::IString str) : cashew::IString(str) {}
-  Name(const std::string &str) : cashew::IString(str.c_str(), false) {}
-
-  friend std::ostream& operator<<(std::ostream &o, Name name) {
-    assert(name.str);
-    return o << '$' << name.str; // reference interpreter requires we prefix all names
-  }
-
-  static Name fromInt(size_t i) {
-    return cashew::IString(std::to_string(i).c_str(), false);
-  }
-};
 
 // An index in a wasm module
 typedef uint32_t Index;
@@ -305,7 +280,7 @@ private:
 
   static void printFloat(std::ostream &o, float f) {
     if (std::isnan(f)) {
-      const char *sign = std::signbit(f) ? "-" : "";
+      const char* sign = std::signbit(f) ? "-" : "";
       o << sign << "nan";
       if (uint32_t payload = NaNPayload(f)) {
         o << ":0x" << std::hex << payload << std::dec;
@@ -315,13 +290,13 @@ private:
     printDouble(o, f);
   }
 
-  static void printDouble(std::ostream &o, double d) {
+  static void printDouble(std::ostream& o, double d) {
     if (d == 0 && std::signbit(d)) {
       o << "-0";
       return;
     }
     if (std::isnan(d)) {
-      const char *sign = std::signbit(d) ? "-" : "";
+      const char* sign = std::signbit(d) ? "-" : "";
       o << sign << "nan";
       if (uint64_t payload = NaNPayload(d)) {
         o << ":0x" << std::hex << payload << std::dec;
@@ -332,7 +307,7 @@ private:
       o << (std::signbit(d) ? "-infinity" : "infinity");
       return;
     }
-    const char *text = cashew::JSPrinter::numToString(d);
+    const char* text = cashew::JSPrinter::numToString(d);
     // spec interpreter hates floats starting with '.'
     if (text[0] == '.') {
       o << '0';
@@ -343,7 +318,7 @@ private:
     o << text;
   }
 
-  friend std::ostream& operator<<(std::ostream &o, Literal literal) {
+  friend std::ostream& operator<<(std::ostream& o, Literal literal) {
     o << '(';
     prepareMinorColor(o) << printWasmType(literal.type) << ".const ";
     switch (literal.type) {
@@ -909,7 +884,7 @@ public:
   }
 };
 
-inline const char *getExpressionName(Expression *curr) {
+inline const char* getExpressionName(Expression* curr) {
   switch (curr->_id) {
     case Expression::Id::InvalidId: abort();
     case Expression::Id::BlockId: return "block";
@@ -978,7 +953,9 @@ public:
   If() : ifFalse(nullptr) {}
   If(MixedArena& allocator) : If() {}
 
-  Expression *condition, *ifTrue, *ifFalse;
+  Expression* condition;
+  Expression* ifTrue;
+  Expression* ifFalse;
 
   // set the type given you know its type, which is the case when parsing
   // s-expression or binary, as explicit types are given. the only additional work
@@ -995,7 +972,7 @@ public:
   Loop(MixedArena& allocator) {}
 
   Name name;
-  Expression *body;
+  Expression* body;
 
   // set the type given you know its type, which is the case when parsing
   // s-expression or binary, as explicit types are given. the only additional work
@@ -1014,8 +991,8 @@ public:
   }
 
   Name name;
-  Expression *value;
-  Expression *condition;
+  Expression* value;
+  Expression* condition;
 
   void finalize() {
     if (condition) {
@@ -1038,8 +1015,8 @@ public:
 
   ArenaVector<Name> targets;
   Name default_;
-  Expression *condition;
-  Expression *value;
+  Expression* condition;
+  Expression* value;
 };
 
 class Call : public SpecificExpression<Expression::CallId> {
@@ -1090,7 +1067,7 @@ public:
 
   ExpressionList operands;
   Name fullType;
-  Expression *target;
+  Expression* target;
 };
 
 class GetLocal : public SpecificExpression<Expression::GetLocalId> {
@@ -1107,7 +1084,7 @@ public:
   SetLocal(MixedArena& allocator) {}
 
   Index index;
-  Expression *value;
+  Expression* value;
 
   bool isTee() {
     return type != none;
@@ -1133,7 +1110,7 @@ public:
   SetGlobal(MixedArena& allocator) {}
 
   Name name;
-  Expression *value;
+  Expression* value;
 };
 
 class Load : public SpecificExpression<Expression::LoadId> {
@@ -1145,7 +1122,7 @@ public:
   bool signed_;
   Address offset;
   Address align;
-  Expression *ptr;
+  Expression* ptr;
 
   // type must be set during creation, cannot be inferred
 };
@@ -1158,7 +1135,8 @@ public:
   uint8_t bytes;
   Address offset;
   Address align;
-  Expression *ptr, *value;
+  Expression* ptr;
+  Expression* value;
   WasmType valueType; // the store never returns a value
 
   void finalize() {
@@ -1186,7 +1164,7 @@ public:
   Unary(MixedArena& allocator) {}
 
   UnaryOp op;
-  Expression *value;
+  Expression* value;
 
   bool isRelational() { return op == EqZInt32 || op == EqZInt64; }
 
@@ -1249,7 +1227,8 @@ public:
   Binary(MixedArena& allocator) {}
 
   BinaryOp op;
-  Expression *left, *right;
+  Expression* left;
+  Expression* right;
 
   // the type is always the type of the operands,
   // except for relationals
@@ -1307,7 +1286,9 @@ public:
   Select() {}
   Select(MixedArena& allocator) {}
 
-  Expression *ifTrue, *ifFalse, *condition;
+  Expression* ifTrue;
+  Expression* ifFalse;
+  Expression* condition;
 
   void finalize() {
     assert(ifTrue && ifFalse);
@@ -1320,7 +1301,7 @@ public:
   Drop() {}
   Drop(MixedArena& allocator) {}
 
-  Expression *value;
+  Expression* value;
 };
 
 class Return : public SpecificExpression<Expression::ReturnId> {
@@ -1330,7 +1311,7 @@ public:
   }
   Return(MixedArena& allocator) : Return() {}
 
-  Expression *value;
+  Expression* value;
 };
 
 class Host : public SpecificExpression<Expression::HostId> {
@@ -1373,11 +1354,14 @@ public:
   std::vector<WasmType> params; // function locals are
   std::vector<WasmType> vars;   // params plus vars
   Name type; // if null, it is implicit in params and result
-  Expression *body;
+  Expression* body;
 
   // local names. these are optional.
   std::vector<Name> localNames;
   std::map<Name, Index> localIndices;
+
+  // node annotations, printed alongside the node in the text format
+  std::unordered_map<Expression*, std::string> annotations;
 
   Function() : result(none) {}
 
@@ -1436,11 +1420,11 @@ enum class ExternalKind {
 
 class Import {
 public:
-  Import() : functionType(nullptr), globalType(none) {}
+  Import() : globalType(none) {}
 
   Name name, module, base; // name = module.base
   ExternalKind kind;
-  FunctionType* functionType; // for Function imports
+  Name functionType; // for Function imports
   WasmType globalType; // for Global imports
 };
 
@@ -1489,7 +1473,7 @@ public:
     Expression* offset;
     std::vector<char> data; // TODO: optimize
     Segment() {}
-    Segment(Expression* offset, const char *init, Address size) : offset(offset) {
+    Segment(Expression* offset, const char* init, Address size) : offset(offset) {
       data.resize(size);
       std::copy_n(init, size, data.begin());
     }
@@ -1519,6 +1503,14 @@ public:
   bool mutable_;
 };
 
+// "Opaque" data, not part of the core wasm spec, that is held in binaries.
+// May be parsed/handled by utility code elsewhere, but not in wasm.h
+class UserSection {
+public:
+  std::string name;
+  std::vector<char> data;
+};
+
 class Module {
 public:
   // wasm contents (generally you shouldn't access these from outside, except maybe for iterating; use add*() and the get() functions)
@@ -1531,6 +1523,8 @@ public:
   Table table;
   Memory memory;
   Name start;
+
+  std::vector<UserSection> userSections;
 
   MixedArena allocator;
 
@@ -1588,7 +1582,7 @@ public:
     globalsMap[curr->name] = curr;
   }
 
-  void addStart(const Name &s) {
+  void addStart(const Name& s) {
     start = s;
   }
 
@@ -1603,10 +1597,26 @@ public:
   }
   // TODO: remove* for other elements
 
-  void updateFunctionsMap() {
+  void updateMaps() {
     functionsMap.clear();
-    for (auto& func : functions) {
-      functionsMap[func->name] = func.get();
+    for (auto& curr : functions) {
+      functionsMap[curr->name] = curr.get();
+    }
+    functionTypesMap.clear();
+    for (auto& curr : functionTypes) {
+      functionTypesMap[curr->name] = curr.get();
+    }
+    importsMap.clear();
+    for (auto& curr : imports) {
+      importsMap[curr->name] = curr.get();
+    }
+    exportsMap.clear();
+    for (auto& curr : exports) {
+      exportsMap[curr->name] = curr.get();
+    }
+    globalsMap.clear();
+    for (auto& curr : globals) {
+      globalsMap[curr->name] = curr.get();
     }
   }
 };
