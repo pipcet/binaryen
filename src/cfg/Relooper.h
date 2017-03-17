@@ -36,7 +36,11 @@ added since the original academic paper [1] was published about it.
 #include "wasm.h"
 #include "wasm-builder.h"
 
+#define RELOOPER_DEBUG
+
 namespace CFG {
+
+typedef wasm::Expression Expression;
 
 class RelooperBuilder : public wasm::Builder {
   wasm::Index labelHelper;
@@ -87,17 +91,17 @@ struct Branch {
 
   // A branch either has a condition expression if the block ends in ifs, or if the block ends in a switch, then a list of indexes, which
   // becomes the indexes in the table of the switch. If not a switch, the condition can be any expression.
-  wasm::Expression* Condition;
+  Expression* Condition;
   std::unique_ptr<std::vector<wasm::Index>> SwitchValues; // switches are rare, so have just a pointer here
 
-  wasm::Expression* Code; // If provided, code that is run right before the branch is taken. This is useful for phis
+  Expression* Code; // If provided, code that is run right before the branch is taken. This is useful for phis
 
-  Branch(wasm::Expression* ConditionInit, wasm::Expression* CodeInit = nullptr);
+  Branch(Expression* ConditionInit, Expression* CodeInit = nullptr);
 
-  Branch(std::vector<wasm::Index>&& ValuesInit, wasm::Expression* CodeInit = nullptr);
+  Branch(std::vector<wasm::Index>&& ValuesInit, Expression* CodeInit = nullptr);
 
   // Emits code for branch
-  wasm::Expression* Render(RelooperBuilder& Builder, Block *Target, bool SetLabel);
+  Expression* Render(RelooperBuilder& Builder, Block *Target, bool SetLabel);
 };
 
 // like std::set, except that begin() -> end() iterates in the
@@ -223,24 +227,24 @@ struct Block {
   BlockSet ProcessedBranchesIn;
   Shape *Parent; // The shape we are directly inside
   int Id; // A unique identifier, defined when added to relooper
-  wasm::Expression* Code; // The code in this block. This can be arbitrary wasm code, including internal control flow, it should just not branch to the outside
-  wasm::Expression* SwitchCondition; // If nullptr, then this block ends in ifs (or nothing). otherwise, this block ends in a switch, done on this condition
+  Expression* Code; // The code in this block. This can be arbitrary wasm code, including internal control flow, it should just not branch to the outside
+  Expression* SwitchCondition; // If nullptr, then this block ends in ifs (or nothing). otherwise, this block ends in a switch, done on this condition
   bool IsCheckedMultipleEntry; // If true, we are a multiple entry, so reaching us requires setting the label variable
 
-  Block(wasm::Expression* CodeInit, wasm::Expression* SwitchConditionInit = nullptr);
+  Block(Expression* CodeInit, Expression* SwitchConditionInit = nullptr);
   ~Block();
 
   // Add a branch: if the condition holds we branch (or if null, we branch if all others failed)
   // Note that there can be only one branch from A to B (if you need multiple conditions for the branch,
   // create a more interesting expression in the Condition).
-  void AddBranchTo(Block *Target, wasm::Expression* Condition, wasm::Expression* Code = nullptr);
+  void AddBranchTo(Block *Target, Expression* Condition, Expression* Code = nullptr);
 
   // Add a switch branch: if the switch condition is one of these values, we branch (or if the list is empty, we are the default)
   // Note that there can be only one branch from A to B (if you need multiple values for the branch, that's what the array and default are for).
-  void AddSwitchBranchTo(Block *Target, std::vector<wasm::Index>&& Values, wasm::Expression* Code = nullptr);
+  void AddSwitchBranchTo(Block *Target, std::vector<wasm::Index>&& Values, Expression* Code = nullptr);
 
   // Emit code for the block, including its contents and branchings out
-  wasm::Expression* Render(RelooperBuilder& Builder, bool InLoop);
+  Expression* Render(RelooperBuilder& Builder, bool InLoop);
 };
 
 // Represents a structured control flow shape, one of
@@ -280,7 +284,7 @@ struct Shape {
   Shape(ShapeType TypeInit) : Id(-1), Next(NULL), Type(TypeInit) {}
   virtual ~Shape() {}
 
-  virtual wasm::Expression* Render(RelooperBuilder& Builder, bool InLoop) = 0;
+  virtual Expression* Render(RelooperBuilder& Builder, bool InLoop) = 0;
 
   static SimpleShape *IsSimple(Shape *It) { return It && It->Type == Simple ? (SimpleShape*)It : NULL; }
   static MultipleShape *IsMultiple(Shape *It) { return It && It->Type == Multiple ? (MultipleShape*)It : NULL; }
@@ -291,7 +295,7 @@ struct SimpleShape : public Shape {
   Block *Inner;
 
   SimpleShape() : Shape(Simple), Inner(NULL) {}
-  wasm::Expression* Render(RelooperBuilder& Builder, bool InLoop) override;
+  Expression* Render(RelooperBuilder& Builder, bool InLoop) override;
 };
 
 typedef std::map<int, Shape*> IdShapeMap;
@@ -301,7 +305,7 @@ struct MultipleShape : public Shape {
 
   MultipleShape() : Shape(Multiple) {}
 
-  wasm::Expression* Render(RelooperBuilder& Builder, bool InLoop) override;
+  Expression* Render(RelooperBuilder& Builder, bool InLoop) override;
 };
 
 struct LoopShape : public Shape {
@@ -310,7 +314,7 @@ struct LoopShape : public Shape {
   BlockSet Entries; // we must visit at least one of these
 
   LoopShape() : Shape(Loop), Inner(NULL) {}
-  wasm::Expression* Render(RelooperBuilder& Builder, bool InLoop) override;
+  Expression* Render(RelooperBuilder& Builder, bool InLoop) override;
 };
 
 // Implements the relooper algorithm for a function's blocks.
@@ -324,7 +328,8 @@ struct LoopShape : public Shape {
 //
 // Implementation details: The Relooper instance has
 // ownership of the blocks and shapes, and frees them when done.
-struct Relooper {
+class Relooper {
+public:
   std::deque<Block*> Blocks;
   std::deque<Shape*> Shapes;
   Shape *Root;
@@ -341,7 +346,7 @@ struct Relooper {
   void Calculate(Block *Entry);
 
   // Renders the result.
-  wasm::Expression* Render(RelooperBuilder& Builder);
+  Expression* Render(RelooperBuilder& Builder);
 
   // Sets us to try to minimize size
   void SetMinSize(bool MinSize_) { MinSize = MinSize_; }

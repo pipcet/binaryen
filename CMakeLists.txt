@@ -166,6 +166,17 @@ SET_PROPERTY(TARGET wasm-opt PROPERTY CXX_STANDARD 11)
 SET_PROPERTY(TARGET wasm-opt PROPERTY CXX_STANDARD_REQUIRED ON)
 INSTALL(TARGETS wasm-opt DESTINATION bin)
 
+SET(wasm-relooper_SOURCES
+  src/tools/wasm-relooper.cpp
+  src/cfg/Relooper.cpp
+)
+ADD_EXECUTABLE(wasm-relooper
+               ${wasm-relooper_SOURCES})
+TARGET_LINK_LIBRARIES(wasm-relooper wasm asmjs emscripten-optimizer ${all_passes} ast support)
+SET_PROPERTY(TARGET wasm-relooper PROPERTY CXX_STANDARD 11)
+SET_PROPERTY(TARGET wasm-relooper PROPERTY CXX_STANDARD_REQUIRED ON)
+INSTALL(TARGETS wasm-relooper DESTINATION bin)
+
 SET(asm2wasm_SOURCES
   src/tools/asm2wasm.cpp
   src/wasm-emscripten.cpp
