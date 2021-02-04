@@ -813,9 +813,6 @@ void FunctionValidator::visitCallIndirect(CallIndirect* curr) {
 }
 
 void FunctionValidator::visitConst(Const* curr) {
-  shouldBeTrue(curr->type.getFeatures() <= getModule()->features,
-               curr,
-               "all used features should be allowed");
 }
 
 void FunctionValidator::visitLocalGet(LocalGet* curr) {
@@ -1629,9 +1626,6 @@ void FunctionValidator::visitBinary(Binary* curr) {
     case InvalidBinary:
       WASM_UNREACHABLE("invliad binary op");
   }
-  shouldBeTrue(Features::get(curr->op) <= getModule()->features,
-               curr,
-               "all used features should be allowed");
 }
 
 void FunctionValidator::visitUnary(Unary* curr) {
@@ -1916,9 +1910,6 @@ void FunctionValidator::visitUnary(Unary* curr) {
     case InvalidUnary:
       WASM_UNREACHABLE("invalid unary op");
   }
-  shouldBeTrue(Features::get(curr->op) <= getModule()->features,
-               curr,
-               "all used features should be allowed");
 }
 
 void FunctionValidator::visitSelect(Select* curr) {
