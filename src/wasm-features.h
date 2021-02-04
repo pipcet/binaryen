@@ -98,7 +98,7 @@ struct FeatureSet {
   bool hasTypedFunctionReferences() const {
     return (features & TypedFunctionReferences) != 0;
   }
-  bool hasAll() const { return (features & All) != 0; }
+  bool hasAny() const { return (features & All) != 0; }
 
   void makeMVP() { features = MVP; }
   void set(FeatureSet f, bool v = true) {
