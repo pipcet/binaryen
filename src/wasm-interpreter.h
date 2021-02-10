@@ -157,6 +157,10 @@ public:
 template<typename SubType>
 class ExpressionRunner : public OverriddenVisitor<SubType, Flow> {
 protected:
+  // Optional module context to search for globals and called functions. NULL if
+  // we are not interested in any context.
+  Module* module = nullptr;
+
   // Maximum depth before giving up.
   Index maxDepth;
   Index depth = 0;
@@ -183,9 +187,11 @@ public:
   // Indicates no limit of maxDepth or maxLoopIterations.
   static const Index NO_LIMIT = 0;
 
-  ExpressionRunner(Index maxDepth = NO_LIMIT,
+  ExpressionRunner(Module* module = nullptr,
+                   Index maxDepth = NO_LIMIT,
                    Index maxLoopIterations = NO_LIMIT)
-    : maxDepth(maxDepth), maxLoopIterations(maxLoopIterations) {}
+    : module(module), maxDepth(maxDepth), maxLoopIterations(maxLoopIterations) {
+  }
 
   Flow visit(Expression* curr) {
     depth++;
@@ -209,6 +215,9 @@ public:
     depth--;
     return ret;
   }
+
+  // Gets the module this runner is operating on.
+  Module* getModule() { return module; }
 
   Flow visitBlock(Block* curr) {
     NOTE_ENTER("Block");
@@ -1426,23 +1435,37 @@ public:
       cast.outcome = cast.Null;
       return cast;
     }
-    // The input may not be a struct or an array; for example it could be an
+    // The input may not be GC data or a function; for example it could be an
     // anyref of null (already handled above) or anything else (handled here,
     // but this is for future use as atm the binaryen interpreter cannot
     // represent external references).
-    if (!cast.originalRef.isData()) {
+    if (!cast.originalRef.isData() && !cast.originalRef.isFunction()) {
       cast.outcome = cast.Failure;
       return cast;
     }
-    auto gcData = cast.originalRef.getGCData();
-    auto refRtt = gcData->rtt;
-    auto intendedRtt = rtt.getSingleValue();
-    if (!refRtt.isSubRtt(intendedRtt)) {
+    Literal seenRtt;
+    Literal intendedRtt = rtt.getSingleValue();
+    if (cast.originalRef.isFunction()) {
+      // Function casts are simple in that they have no RTT hierarchies; instead
+      // each reference has the canonical RTT for the signature.
+      // We must have a module in order to perform the cast, to get the type.
+      assert(module);
+      auto* func = module->getFunction(cast.originalRef.getFunc());
+      seenRtt = Literal(Type(Rtt(0, func->sig)));
+      cast.castRef =
+        Literal(func->name, Type(intendedRtt.type.getHeapType(), Nullable));
+    } else {
+      // GC data store an RTT in each instance.
+      assert(cast.originalRef.isData());
+      auto gcData = cast.originalRef.getGCData();
+      seenRtt = gcData->rtt;
+      cast.castRef =
+        Literal(gcData, Type(intendedRtt.type.getHeapType(), Nullable));
+    }
+    if (!seenRtt.isSubRtt(intendedRtt)) {
       cast.outcome = cast.Failure;
     } else {
       cast.outcome = cast.Success;
-      cast.castRef =
-        Literal(gcData, Type(intendedRtt.type.getHeapType(), Nullable));
     }
     return cast;
   }
@@ -1788,10 +1811,6 @@ public:
   static const Index NO_LIMIT = 0;
 
 protected:
-  // Optional module context to search for globals and called functions. NULL if
-  // we are not interested in any context.
-  Module* module = nullptr;
-
   // Flags indicating special requirements. See FlagValues.
   Flags flags = FlagValues::DEFAULT;
 
@@ -1808,11 +1827,8 @@ public:
                            Flags flags,
                            Index maxDepth,
                            Index maxLoopIterations)
-    : ExpressionRunner<SubType>(maxDepth, maxLoopIterations), module(module),
+    : ExpressionRunner<SubType>(module, maxDepth, maxLoopIterations),
       flags(flags) {}
-
-  // Gets the module this runner is operating on.
-  Module* getModule() { return module; }
 
   // Sets a known local value to use.
   void setLocalValue(Index index, Literals& values) {
@@ -1858,8 +1874,8 @@ public:
   Flow visitGlobalGet(GlobalGet* curr) {
     NOTE_ENTER("GlobalGet");
     NOTE_NAME(curr->name);
-    if (module != nullptr) {
-      auto* global = module->getGlobal(curr->name);
+    if (this->module != nullptr) {
+      auto* global = this->module->getGlobal(curr->name);
       // Check if the global has an immutable value anyway
       if (!global->imported() && !global->mutable_) {
         return ExpressionRunner<SubType>::visit(global->init);
@@ -1875,10 +1891,11 @@ public:
   Flow visitGlobalSet(GlobalSet* curr) {
     NOTE_ENTER("GlobalSet");
     NOTE_NAME(curr->name);
-    if (!(flags & FlagValues::PRESERVE_SIDEEFFECTS) && module != nullptr) {
+    if (!(flags & FlagValues::PRESERVE_SIDEEFFECTS) &&
+        this->module != nullptr) {
       // If we are evaluating and not replacing the expression, remember the
       // constant value set, if any, for subsequent gets.
-      auto* global = module->getGlobal(curr->name);
+      auto* global = this->module->getGlobal(curr->name);
       assert(global->mutable_);
       auto setFlow = ExpressionRunner<SubType>::visit(curr->value);
       if (!setFlow.breaking()) {
@@ -1895,8 +1912,8 @@ public:
     // when replacing as long as the function does not have any side effects.
     // Might yield something useful for simple functions like `clamp`, sometimes
     // even if arguments are only partially constant or not constant at all.
-    if ((flags & FlagValues::TRAVERSE_CALLS) != 0 && module != nullptr) {
-      auto* func = module->getFunction(curr->target);
+    if ((flags & FlagValues::TRAVERSE_CALLS) != 0 && this->module != nullptr) {
+      auto* func = this->module->getFunction(curr->target);
       if (!func->imported()) {
         if (func->sig.results.isConcrete()) {
           auto numOperands = curr->operands.size();
@@ -2023,7 +2040,8 @@ class InitializerExpressionRunner
 
 public:
   InitializerExpressionRunner(GlobalManager& globals, Index maxDepth)
-    : ExpressionRunner<InitializerExpressionRunner<GlobalManager>>(maxDepth),
+    : ExpressionRunner<InitializerExpressionRunner<GlobalManager>>(nullptr,
+                                                                   maxDepth),
       globals(globals) {}
 
   Flow visitGlobalGet(GlobalGet* curr) { return Flow(globals[curr->name]); }
@@ -2051,7 +2069,8 @@ public:
     virtual void init(Module& wasm, SubType& instance) {}
     virtual void importGlobals(GlobalManager& globals, Module& wasm) = 0;
     virtual Literals callImport(Function* import, LiteralList& arguments) = 0;
-    virtual Literals callTable(Index index,
+    virtual Literals callTable(Name tableName,
+                               Index index,
                                Signature sig,
                                LiteralList& arguments,
                                Type result,
@@ -2202,7 +2221,7 @@ public:
       WASM_UNREACHABLE("unimp");
     }
 
-    virtual void tableStore(Address addr, Name entry) {
+    virtual void tableStore(Name tableName, Address addr, Name entry) {
       WASM_UNREACHABLE("unimp");
     }
   };
@@ -2289,17 +2308,20 @@ private:
   std::unordered_set<size_t> droppedSegments;
 
   void initializeTableContents() {
-    for (auto& segment : wasm.table.segments) {
-      Address offset =
-        (uint32_t)InitializerExpressionRunner<GlobalManager>(globals, maxDepth)
-          .visit(segment.offset)
-          .getSingleValue()
-          .geti32();
-      if (offset + segment.data.size() > wasm.table.initial) {
-        externalInterface->trap("invalid offset when initializing table");
-      }
-      for (size_t i = 0; i != segment.data.size(); ++i) {
-        externalInterface->tableStore(offset + i, segment.data[i]);
+    for (auto& table : wasm.tables) {
+      for (auto& segment : table->segments) {
+        Address offset = (uint32_t)InitializerExpressionRunner<GlobalManager>(
+                           globals, maxDepth)
+                           .visit(segment.offset)
+                           .getSingleValue()
+                           .geti32();
+        if (offset + segment.data.size() > table->initial) {
+          externalInterface->trap("invalid offset when initializing table");
+        }
+        for (size_t i = 0; i != segment.data.size(); ++i) {
+          externalInterface->tableStore(
+            table->name, offset + i, segment.data[i]);
+        }
       }
     }
   }
@@ -2384,8 +2406,8 @@ private:
     RuntimeExpressionRunner(ModuleInstanceBase& instance,
                             FunctionScope& scope,
                             Index maxDepth)
-      : ExpressionRunner<RuntimeExpressionRunner>(maxDepth), instance(instance),
-        scope(scope) {}
+      : ExpressionRunner<RuntimeExpressionRunner>(&instance.wasm, maxDepth),
+        instance(instance), scope(scope) {}
 
     Flow visitCall(Call* curr) {
       NOTE_ENTER("Call");
@@ -2425,7 +2447,7 @@ private:
       Index index = target.getSingleValue().geti32();
       Type type = curr->isReturn ? scope.function->sig.results : curr->type;
       Flow ret = instance.externalInterface->callTable(
-        index, curr->sig, arguments, type, *instance.self());
+        curr->table, index, curr->sig, arguments, type, *instance.self());
       // TODO: make this a proper tail call (return first)
       if (curr->isReturn) {
         ret.breakTo = RETURN_FLOW;
